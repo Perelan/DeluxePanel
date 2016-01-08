@@ -39,7 +39,6 @@ import sharecrew.net.fragpanel.reports.Report;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     private ArrayList<Report> mDataset = null;
-    private String link = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/f1/f1dd60a188883caf82d0cbfccfe6aba0af1732d4_full.jpg";
     private AdminSession as;
     private Admin a;
     private final String TAG = "******* List Adapter";
