@@ -29,6 +29,7 @@ public class HTTPUpdateKarma {
             OutputStream os = con.getOutputStream();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
             writer.write(getData(postData));
+            System.out.println(getData(postData));
 
             writer.flush();
             writer.close();

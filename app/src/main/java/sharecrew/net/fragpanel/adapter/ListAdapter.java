@@ -1,8 +1,6 @@
 package sharecrew.net.fragpanel.adapter;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -19,39 +17,33 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 
 import sharecrew.net.fragpanel.R;
+import sharecrew.net.fragpanel.extra.Utility;
 import sharecrew.net.fragpanel.login.Admin;
 import sharecrew.net.fragpanel.login.AdminSession;
-import sharecrew.net.fragpanel.reports.HTTPFetchSteam;
-import sharecrew.net.fragpanel.reports.HTTPReportRequest;
 import sharecrew.net.fragpanel.reports.HTTPUpdateKarma;
 import sharecrew.net.fragpanel.reports.Report;
+
+
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     private ArrayList<Report> mDataset = null;
     private AdminSession as;
     private Admin a;
     private final String TAG = "******* List Adapter";
-    private HashMap<String, String> karma_list;
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         CardView cv;
-        TextView server_name, admin_name, date, suspect_name, reporting_name,reason, karma, task;
+        TextView server_name, admin_name, date, suspect_name, reporting_id, reporting_name,reason, karma, task;
         ImageView suspected_pic, reporting_pic;
         ViewGroup expandable;
         ImageView expandDown, expandUp, uparrow, downarrow;
         boolean isClicked, isPressed;
         Button mute, kick, ban, complete, claim;
+        HashMap<String, String> karma_list;
 
         public ViewHolder(View v) {
             super(v);
@@ -61,6 +53,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             date            = (TextView) v.findViewById(R.id.month_text);
             suspect_name    = (TextView) v.findViewById(R.id.suspect);
             reporting_name  = (TextView) v.findViewById(R.id.reporter);
+            reporting_id    = (TextView) v.findViewById(R.id.reporting_id);
             reason          = (TextView) v.findViewById(R.id.reason_text);
             karma           = (TextView) v.findViewById(R.id.karma_id);
             task            = (TextView) v.findViewById(R.id.taken_txt);
@@ -77,13 +70,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             ban             = (Button) v.findViewById(R.id.ban_btn);
             claim           = (Button) v.findViewById(R.id.claim_btn);
             isPressed       = false;
+            karma_list      = new HashMap<>();
 
             uparrow.setOnClickListener(this);
             downarrow.setOnClickListener(this);
             claim.setOnClickListener(this);
             v.setOnClickListener(this);
         }
-
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         @Override
         public void onClick(View v) {
@@ -102,8 +95,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                     Toast.makeText(v.getContext(), "You've to be the claiming admin to do that!",
                             Toast.LENGTH_SHORT).show();
                 }else{
+                    int karma_count = Integer.parseInt((String) karma.getText());
+
                     if(v.getId() == R.id.uparrow){
-                        int karma_count = Integer.parseInt((String) karma.getText());
                         if(isPressed){
                             karma_count += 2;
                         }else{
@@ -112,13 +106,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                         karma.setText(String.format("%s", karma_count));
                         uparrow.setEnabled(false);
                         downarrow.setEnabled(true);
-                        karma_list.put("user", (String) reporting_name.getText());
-                        karma_list.put("karma", String.format("%s", karma_count));
-                        new UpdateKarma(karma_list).execute();
-                        //uparrow.setBackgroundResource(R.drawable.downarrow);
                         isPressed = true;
                     }else{
-                        int karma_count = Integer.parseInt((String) karma.getText());
                         if(isPressed){
                             karma_count -= 2;
                         }else{
@@ -127,11 +116,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                         karma.setText(String.format("%s", karma_count));
                         uparrow.setEnabled(true);
                         downarrow.setEnabled(false);
-                        karma_list.put("user", (String) reporting_name.getText());
-                        karma_list.put("karma", String.format("%s", karma_count));
-                        new UpdateKarma(karma_list).execute();
                         isPressed = true;
                     }
+
+                    karma_list.put("user", (String) reporting_name.getText());
+                    karma_list.put("karma", (String) karma.getText());
+                    new UpdateKarma().execute(karma_list);
                 }
             // Handle the expand view (able to press the whole card to expand).
             }else{
@@ -149,6 +139,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             }
         }
     }
+
     public ListAdapter(ArrayList<Report> mDataset) {
         this.mDataset = mDataset;
 
@@ -165,7 +156,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.suspect_name.setText(mDataset.get(position).getReported_name());
         holder.reporting_name.setText(mDataset.get(position).getReporting_name());
-        holder.date.setText(convert(mDataset.get(position).getDate()));
+        holder.reporting_id.setText(mDataset.get(position).getReporting_karma());
+        holder.date.setText(Utility.convert_time(mDataset.get(position).getDate()));
         holder.server_name.setText(mDataset.get(position).getServer_name());
         holder.karma.setText(mDataset.get(position).getReporting_karma());
         holder.reason.setText(mDataset.get(position).getReason());
@@ -213,54 +205,17 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         return mDataset == null ? 0 : mDataset.size();
     }
 
-    public String convert(String date){
-        // 2015-12-27 21:00:16
-        try{
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
-            Calendar c = Calendar.getInstance();
-            Calendar start = Calendar.getInstance();
-            Date d = df.parse(date);
-            c.setTime(d);
-
-            long diff        = (start.getTime().getTime() - c.getTime().getTime());
-            long diffDays    = diff / (24 * 60 * 60 * 1000);
-            long diffHours   = diff / (60 * 60 * 1000) % 24;
-            long diffMinutes = diff / (60 * 1000) % 60;
-            long diffSeconds = diff / 1000 % 60;
-
-            if(diffDays == 0 && diffHours == 0) {
-                return String.format("%s mins, %s secs ago", diffMinutes, diffSeconds);
-            }else if(diffDays == 0){
-                return String.format("%s hrs, %s mins ago", diffHours, diffMinutes);
-            }else{
-                return String.format("%s days, %s hrs ago", diffDays, diffHours);
-            }
-
-        }catch(ParseException e){
-            e.getStackTrace();
-        }
-
-        return "ERROR";
-    }
-
     // The part which is a nono
-    public class UpdateKarma extends AsyncTask<String, Void, Void> {
-
-        private HashMap<String, String> list;
-
-        public UpdateKarma(HashMap<String, String> list){
-            this.list = list;
-            list.put("key", "fragpanel123");
-        }
+    public class UpdateKarma extends AsyncTask<HashMap<String, String>, Void, Void> {
 
         @Override
-        protected Void doInBackground(String... params) {
-            list.put("user", params[0]);
-            list.put("karma", params[1]);
+        protected Void doInBackground(HashMap<String, String>... params) {
+            Log.v(TAG, ""+params[0]);
 
+            HashMap<String, String> list = params[0];
+            list.put("key", "fragpanel123");
             HTTPUpdateKarma uk = new HTTPUpdateKarma();
             uk.update_data("http://www.sharecrew.net/deluxepanel/update_karma.php", list);
-
             return null;
         }
     }
