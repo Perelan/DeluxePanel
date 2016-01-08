@@ -1,0 +1,309 @@
+<android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    card_view:cardBackgroundColor="@color/colorPrimary"
+    android:layout_margin="10dp"
+    android:clickable="true"
+    android:id="@+id/card_view"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+
+            <TextView
+                android:id="@+id/suspect"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimaryDark"
+                android:text="The Suspect"
+                android:textStyle="bold"
+                android:textColor="@color/colorRed"
+                android:textSize="14sp"
+                android:gravity="center|center_horizontal" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/top_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="35dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
+
+            <!-- SUSPECTED STEAM PICTURE -->
+            <com.github.siyamed.shapeimageview.CircularImageView
+                android:layout_width="80dp"
+                android:layout_height="100dp"
+                android:src="@drawable/default_steam"
+                android:id="@+id/suspect_avatar"
+                app:siBorderWidth="4dp"
+                app:siBorderColor="@color/colorRed"
+                android:clickable="true"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/uparrow"
+                android:id="@+id/expandUp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/downarrow"
+                android:id="@+id/expandDown"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+            <!-- EXPAND AND COLLAPSE -->
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/month"
+                android:id="@+id/month_img"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="13dp"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/admin_name"
+                android:layout_toEndOf="@+id/admin_name" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="date"
+                android:textColor="@android:color/white"
+                android:id="@+id/month_text"
+                android:layout_alignBottom="@+id/admin_name"
+                android:layout_toRightOf="@+id/month_img"
+                android:layout_toEndOf="@+id/month_img"
+                android:layout_marginLeft="5dp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:id="@+id/server_img"
+                android:src="@drawable/computer"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="10dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="server"
+                android:textColor="@android:color/white"
+                android:id="@+id/server_text"
+                android:layout_alignTop="@+id/server_img"
+                android:layout_alignLeft="@+id/server_img"
+                android:layout_alignStart="@+id/server_img"
+                android:layout_marginLeft="27dp"
+                android:layout_marginStart="27dp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:id="@+id/admin_img"
+                android:src="@drawable/admin"
+                android:layout_alignTop="@+id/server_img"
+                android:layout_toRightOf="@+id/server_text"
+                android:layout_toEndOf="@+id/server_text"
+                android:layout_marginLeft="10dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="admin"
+                android:textColor="@android:color/white"
+                android:id="@+id/admin_name"
+                android:layout_alignBottom="@+id/server_text"
+                android:layout_toRightOf="@+id/admin_img"
+                android:layout_toEndOf="@+id/admin_img"
+                android:layout_marginLeft="5dp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:id="@+id/hammer_img"
+                android:src="@drawable/hammer"
+                android:layout_alignTop="@+id/reason_text"
+                android:layout_toRightOf="@+id/admin_img"
+                android:layout_toEndOf="@+id/admin_img"
+                android:layout_marginLeft="5dp" />
+
+            <TextView
+                android:layout_width="250dp"
+                android:layout_height="100dp"
+                android:text="reason message reason message reason message"
+                android:textColor="@android:color/white"
+                android:id="@+id/reason_text"
+                android:layout_alignTop="@+id/suspect_avatar"
+                android:layout_toRightOf="@+id/hammer_img"
+                android:layout_toEndOf="@+id/hammer_img"
+                android:layout_alignBottom="@+id/suspect_avatar"
+                android:layout_marginLeft="5dp" />
+        </RelativeLayout>
+
+        <!-- EXPANDED CARDVIEW -->
+        <RelativeLayout
+            android:id="@+id/expandable_part_layout"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:layout_below="@+id/top_layout"
+            android:background="@color/colorPrimary">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="25dp"
+                android:src="@drawable/uparrow"
+                android:id="@+id/uparrow"
+                android:clickable="true"
+                android:layout_above="@+id/karma_id"
+                android:layout_alignLeft="@+id/downarrow"
+                android:layout_alignStart="@+id/downarrow" />
+
+            <TextView
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="#FFFFFF"
+                android:id="@+id/karma_id"
+                android:gravity="center"
+                android:layout_above="@+id/downarrow"
+                android:layout_alignLeft="@+id/uparrow"
+                android:layout_alignStart="@+id/uparrow" />
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="25dp"
+                android:src="@drawable/downarrow"
+                android:id="@+id/downarrow"
+                android:clickable="true"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/reporter_avatar"
+                android:layout_toStartOf="@+id/reporter_avatar"
+                android:layout_marginRight="5dp" />
+
+            <com.github.siyamed.shapeimageview.CircularImageView
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/default_steam"
+                android:id="@+id/reporter_avatar"
+                app:siBorderWidth="4dp"
+                app:siBorderColor="@color/colorBlue"
+                android:clickable="true"
+                android:layout_marginRight="10dp"
+                android:layout_marginEnd="13dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="15dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/colorPrimaryDark"
+                android:text="The Reporter"
+                android:textStyle="bold"
+                android:textColor="@color/colorBlue"
+                android:textSize="14sp"
+                android:gravity="center|center_horizontal"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:id="@+id/reporter" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ban"
+                android:id="@+id/ban_btn"
+                android:background="@color/colorAccent"
+                android:textColor="@android:color/white"
+                android:layout_alignWithParentIfMissing="false"
+                android:layout_marginRight="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_alignTop="@+id/kick_btn"
+                android:layout_toLeftOf="@+id/kick_btn"
+                android:layout_toStartOf="@+id/kick_btn"
+                android:visibility="gone"
+                android:clickable="true"/>
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kick"
+                android:id="@+id/kick_btn"
+                android:background="@color/colorAccent"
+                android:textColor="@android:color/white"
+                android:layout_alignWithParentIfMissing="false"
+                android:layout_marginRight="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_alignBaseline="@+id/karma_id"
+                android:layout_alignBottom="@+id/karma_id"
+                android:layout_toLeftOf="@+id/mute_btn"
+                android:layout_toStartOf="@+id/mute_btn"
+                android:visibility="gone"
+                android:clickable="true"/>
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="mute"
+                android:id="@+id/mute_btn"
+                android:background="@color/colorAccent"
+                android:textColor="@android:color/white"
+                android:layout_alignWithParentIfMissing="false"
+                android:layout_alignTop="@+id/kick_btn"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"
+                android:clickable="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Claim"
+                android:id="@+id/claim_btn"
+                android:background="@color/colorAccent"
+                android:textColor="@android:color/white"
+                android:clickable="true"
+                android:layout_alignBottom="@+id/karma_id"
+                android:layout_toLeftOf="@+id/uparrow"
+                android:layout_toStartOf="@+id/uparrow"
+                android:layout_marginRight="54dp"
+                android:layout_marginEnd="54dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="TASK IS TAKEN"
+                android:visibility="gone"
+                android:id="@+id/taken_txt"
+                android:textColor="@android:color/white"
+                android:layout_marginRight="40dp"
+                android:layout_alignTop="@+id/karma_id"
+                android:layout_toLeftOf="@+id/karma_id"
+                android:layout_toStartOf="@+id/karma_id" />
+        </RelativeLayout>
+    </RelativeLayout>
+</android.support.v7.widget.CardView>
