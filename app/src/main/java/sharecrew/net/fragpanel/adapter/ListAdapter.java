@@ -243,6 +243,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         return "ERROR";
     }
 
+    // The part which is a nono
     public class UpdateKarma extends AsyncTask<String, Void, Void> {
 
         private HashMap<String, String> list;
