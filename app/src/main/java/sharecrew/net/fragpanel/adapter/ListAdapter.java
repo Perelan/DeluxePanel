@@ -90,51 +90,54 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 kick.setVisibility(View.VISIBLE);
                 ban.setVisibility(View.VISIBLE);
             // Handle karma upvote and downvote
-            }else if(v.getId() == R.id.uparrow || v.getId() == R.id.downarrow){
-                if(!admin_name.getText().equals(a.getName())){
-                    Toast.makeText(v.getContext(), "You've to be the claiming admin to do that!",
-                            Toast.LENGTH_SHORT).show();
-                }else{
-                    int karma_count = Integer.parseInt((String) karma.getText());
+            }else {
+                if (v.getId() == R.id.uparrow || v.getId() == R.id.downarrow) {
+                    if (!admin_name.getText().equals(a.getName())) {
+                        Toast.makeText(v.getContext(), "You've to be the claiming admin to do that!",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        int karma_count = Integer.parseInt((String) karma.getText());
 
-                    if(v.getId() == R.id.uparrow){
-                        if(isPressed){
-                            karma_count += 2;
-                        }else{
-                            karma_count++;
+                        if (v.getId() == R.id.uparrow) {
+                            if (isPressed) {
+                                karma_count += 2;
+                            } else {
+                                karma_count++;
+                            }
+                            karma.setText(String.format("%s", karma_count));
+                            uparrow.setEnabled(false);
+                            downarrow.setEnabled(true);
+                            isPressed = true;
+                        } else {
+                            if (isPressed) {
+                                karma_count -= 2;
+                            } else {
+                                karma_count--;
+                            }
+                            karma.setText(String.format("%s", karma_count));
+                            uparrow.setEnabled(true);
+                            downarrow.setEnabled(false);
+                            isPressed = true;
                         }
-                        karma.setText(String.format("%s", karma_count));
-                        uparrow.setEnabled(false);
-                        downarrow.setEnabled(true);
-                        isPressed = true;
-                    }else{
-                        if(isPressed){
-                            karma_count -= 2;
-                        }else{
-                            karma_count--;
-                        }
-                        karma.setText(String.format("%s", karma_count));
-                        uparrow.setEnabled(true);
-                        downarrow.setEnabled(false);
-                        isPressed = true;
+
+                        karma_list.put("user", "4");
+                        karma_list.put("karma", (String) karma.getText());
+                        new UpdateKarma().execute(karma_list);
+
                     }
-
-                    karma_list.put("user", (String) reporting_name.getText());
-                    karma_list.put("karma", (String) karma.getText());
-                    new UpdateKarma().execute(karma_list);
-                }
-            // Handle the expand view (able to press the whole card to expand).
-            }else{
-                if (!isClicked) {
-                    expandUp.setVisibility(View.VISIBLE);
-                    expandDown.setVisibility(View.GONE);
-                    expandable.setVisibility(View.VISIBLE);
-                    isClicked = true;
+                    // Handle the expand view (able to press the whole card to expand).
                 } else {
-                    expandUp.setVisibility(View.GONE);
-                    expandDown.setVisibility(View.VISIBLE);
-                    expandable.setVisibility(View.GONE);
-                    isClicked = false;
+                    if (!isClicked) {
+                        expandUp.setVisibility(View.VISIBLE);
+                        expandDown.setVisibility(View.GONE);
+                        expandable.setVisibility(View.VISIBLE);
+                        isClicked = true;
+                    } else {
+                        expandUp.setVisibility(View.GONE);
+                        expandDown.setVisibility(View.VISIBLE);
+                        expandable.setVisibility(View.GONE);
+                        isClicked = false;
+                    }
                 }
             }
         }
@@ -208,14 +211,15 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     // The part which is a nono
     public class UpdateKarma extends AsyncTask<HashMap<String, String>, Void, Void> {
 
+        @SafeVarargs
         @Override
-        protected Void doInBackground(HashMap<String, String>... params) {
+        protected final Void doInBackground(HashMap<String, String>... params) {
             Log.v(TAG, ""+params[0]);
 
             HashMap<String, String> list = params[0];
-            list.put("key", "fragpanel123");
+            list.put("key", Utility.KEY);
             HTTPUpdateKarma uk = new HTTPUpdateKarma();
-            uk.update_data("http://www.sharecrew.net/deluxepanel/update_karma.php", list);
+            uk.update_data(list);
             return null;
         }
     }

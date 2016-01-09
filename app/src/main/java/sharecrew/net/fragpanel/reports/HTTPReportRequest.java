@@ -6,19 +6,15 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import sharecrew.net.fragpanel.extra.Utility;
+
 public class HTTPReportRequest {
 
     // 10.0.3.2 <-- GenyMotion
 
-    private String key;
-
-    public HTTPReportRequest(String key){
-        this.key = key;
-    }
-
     public String connect(){
-        String link = "http://sharecrew.net/deluxepanel/fetch_report.php";
-        String newLink = link + "?key=" + key;
+        String link = "fetch_report.php";
+        String newLink = Utility.WEBSITE + link + "?key=" + Utility.KEY;
         URL url;
         HttpURLConnection urlConnection = null;
 

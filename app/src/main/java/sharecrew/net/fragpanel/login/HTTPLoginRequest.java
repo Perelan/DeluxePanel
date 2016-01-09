@@ -7,13 +7,15 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import sharecrew.net.fragpanel.extra.Utility;
+
 public class HTTPLoginRequest {
 
     String username, password;
 
     // 10.0.3.2 <-- GenyMotion
 
-    private final String LINK = "http://sharecrew.net/deluxepanel/fetch_admin.php";
+    private final String LINK = "fetch_admin.php";
 
     public HTTPLoginRequest(String username, String password){
         this.username = username;
@@ -21,7 +23,7 @@ public class HTTPLoginRequest {
     }
 
     public String connect(){
-        String newLink = LINK + "?admin_username=" + username +
+        String newLink = Utility.WEBSITE + LINK + "?admin_username=" + username +
                         "&admin_password=" + decode_password(password);
         URL url;
         HttpURLConnection urlConnection = null;
@@ -56,7 +58,7 @@ public class HTTPLoginRequest {
         return "";
     }
 
-    public String decode_password(final String password){
+    private String decode_password(final String password){
         try{
             MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
             digest.update(password.getBytes());

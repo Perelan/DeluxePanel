@@ -10,6 +10,9 @@ import java.util.Locale;
 
 public class Utility {
 
+    public static final String KEY = "fragpanel123";
+    public static final String WEBSITE = "http://sharecrew.net/deluxepanel/";
+
     /**
      * This method is used to convert a input timestamp (default: current timestamp from sql), which is in
      * this format: yyyy-MM-dd HH:mm:ss (i.e: 2015-12-27 21:00:16) to find secs, mins, hours and days

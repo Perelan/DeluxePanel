@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected ArrayList<Report> doInBackground(Void... params) {
 
-            HTTPReportRequest rr = new HTTPReportRequest("fragpanel123");
+            HTTPReportRequest rr = new HTTPReportRequest();
             String s = rr.connect();
 
             if(s.equals("404")){
