@@ -11,6 +11,7 @@ public class Report {
     private String reported_num_reports;
 
     private String reporting_name;
+    private String reporting_id;
     private String reporting_steam_id;
     private String reporting_steam_id64;
     private String reporting_karma;
@@ -24,7 +25,7 @@ public class Report {
 
 
     public Report(String report_id, String server_name, String admin_name, String reported_name, String reported_steam_id, String reported_steam_id64,
-                  String reported_num_reports, String reporting_name, String reporting_steam_id, String reporting_steam_id64, String reporting_karma,
+                  String reported_num_reports, String reporting_name, String reporting_id, String reporting_steam_id, String reporting_steam_id64, String reporting_karma,
                   String reason, String complete, String date, String reported_avatar, String reporting_avatar) {
         this.report_id = report_id;
         this.server_name = server_name;
@@ -36,6 +37,7 @@ public class Report {
         this.reported_num_reports = reported_num_reports;
 
         this.reporting_name = reporting_name;
+        this.reporting_id = reporting_id;
         this.reporting_steam_id = reporting_steam_id;
         this.reporting_steam_id64 = reporting_steam_id64;
         this.reporting_karma = reporting_karma;
@@ -78,6 +80,10 @@ public class Report {
 
     public String getReporting_name() {
         return reporting_name;
+    }
+
+    public String getReporting_id(){
+        return reporting_id;
     }
 
     public String getReporting_steam_id() {
@@ -123,6 +129,7 @@ public class Report {
                 ", reported_steam_id64='" + reported_steam_id64 + '\'' +
                 ", reported_num_reports='" + reported_num_reports + '\'' +
                 ", reporting_name='" + reporting_name + '\'' +
+                ", reporting_id='" + reporting_id + '\'' +
                 ", reporting_steam_id='" + reporting_steam_id + '\'' +
                 ", reporting_steam_id64='" + reporting_steam_id64 + '\'' +
                 ", reporting_karma='" + reporting_karma + '\'' +

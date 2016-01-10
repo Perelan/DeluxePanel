@@ -19,12 +19,17 @@ import java.util.Map;
 
 import sharecrew.net.fragpanel.extra.Utility;
 
-public class HTTPUpdateKarma {
+public class HTTPUpdateData {
+
+    private String link;
+
+    public HTTPUpdateData(String link){
+        this.link = link;
+    }
 
     public void update_data(HashMap<String, String> postData){
         URL url;
         final int CONNECTION_TIMEOUT = 15 * 1000;
-        String link = "update_karma.php?";
         try{
             String requestUrl = Utility.WEBSITE + link;
             url = new URL(requestUrl);

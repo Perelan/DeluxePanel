@@ -156,6 +156,16 @@
                 android:layout_toEndOf="@+id/hammer_img"
                 android:layout_alignBottom="@+id/suspect_avatar"
                 android:layout_marginLeft="5dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="STEAM_0:0:1234567"
+                android:id="@+id/reported_steamid"
+                android:layout_below="@+id/hammer_img"
+                android:layout_toLeftOf="@+id/hammer_img"
+                android:layout_toStartOf="@+id/hammer_img"
+                android:visibility="gone"/>
         </RelativeLayout>
 
         <!-- EXPANDED CARDVIEW -->

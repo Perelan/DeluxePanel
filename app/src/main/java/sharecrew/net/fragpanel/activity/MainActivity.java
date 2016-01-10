@@ -181,10 +181,11 @@ public class MainActivity extends AppCompatActivity
                 String[] temp = fetch_sep_report[i].split("\\|");
 
                 String reported_avatar  = new HTTPFetchSteam(temp[5]).fetch_steam_avatar();
-                String reporting_avatar = new HTTPFetchSteam(temp[9]).fetch_steam_avatar();
+                String reporting_avatar = new HTTPFetchSteam(temp[10]).fetch_steam_avatar();
 
                 list.add(new Report(temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], temp[6], temp[7],
-                                    temp[8], temp[9], temp[10], temp[11], temp[12], temp[13], reported_avatar, reporting_avatar));
+                                    temp[8], temp[9], temp[10], temp[11], temp[12], temp[13], temp[14],
+                                    reported_avatar, reporting_avatar));
             }
             System.out.println(list.toString());
 
@@ -197,9 +198,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(ArrayList<Report> result) {
             super.onPostExecute(result);
-            //Here you can update the view
 
-            // Notify swipeRefreshLayout that the refresh has finished
             mSwipeRefreshLayout.setRefreshing(false);
         }
     }
