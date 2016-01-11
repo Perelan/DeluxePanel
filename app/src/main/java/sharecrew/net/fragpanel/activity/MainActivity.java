@@ -1,12 +1,11 @@
 package sharecrew.net.fragpanel.activity;
 
-import android.app.Activity;
-import android.app.ActivityOptions;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityOptionsCompat;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -15,19 +14,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
+import sharecrew.net.fragpanel.extra.Utility;
 import sharecrew.net.fragpanel.reports.HTTPFetchSteam;
 import sharecrew.net.fragpanel.reports.HTTPReportRequest;
+import sharecrew.net.fragpanel.reports.HTTPUpdateData;
 import sharecrew.net.fragpanel.reports.Report;
 import sharecrew.net.fragpanel.R;
 import sharecrew.net.fragpanel.adapter.ListAdapter;
@@ -44,7 +47,8 @@ public class MainActivity extends AppCompatActivity
     private TextView status;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView recView;
-    private LinearLayout layout;
+    private ListAdapter la;
+    private final String TAG = "*** MAIN";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        status = (TextView) findViewById(R.id.status_message);
 
         recView = (RecyclerView) findViewById(R.id.recycler_view);
         recView.setHasFixedSize(true);
@@ -61,10 +67,92 @@ public class MainActivity extends AppCompatActivity
         llm.setStackFromEnd(true);
         recView.setLayoutManager(llm);
 
-        status = (TextView) findViewById(R.id.status_message);
-        status.setVisibility(View.GONE);
-
         handle_list();
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        handle_list();
+                    }
+                }
+        );
+        /*
+        SwipeableRecyclerViewTouchListener swipeTouchListener =
+                new SwipeableRecyclerViewTouchListener(recView,
+                        new SwipeableRecyclerViewTouchListener.SwipeListener() {
+                            @Override
+                            public boolean canSwipe(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                handle_action(recyclerView, reverseSortedPositions);
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                handle_action(recyclerView, reverseSortedPositions);
+                                la.onItemRemove(viewHolder, recView);
+
+                            }
+
+                            public void handle_action(RecyclerView recyclerView, int[] reverseSortedPositions){
+                                for(final int position : reverseSortedPositions){
+                                    final ArrayList<Report> temp = new ArrayList<>(list.size());
+                                    temp.add(list.get(position));
+
+                                    new UpdateDataTask("update_report.php?", "1").execute(list.get(position).getReport_id());
+                                    final int store_position = position;
+                                    list.remove(position);
+                                    la.notifyItemRemoved(position);
+
+                                    Snackbar snackbak = Snackbar.make(recyclerView, "The report were removed! Restore it while you can.", Snackbar.LENGTH_LONG);
+                                    snackbak.setAction("UNDO", new View.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(View view) {
+                                                    for (int i = 0; i < temp.size(); i++) {
+                                                        list.add(temp.get(i));
+                                                    }
+
+                                                    System.out.println(list);
+
+                                                    new UpdateDataTask("update_report.php?", "0").execute(list.get(store_position).getReport_id());
+                                                    la.notifyItemInserted(position);
+                                                }
+                                            }).setActionTextColor(Color.RED);
+
+                                    snackbak.show();
+                                }
+                                la.notifyDataSetChanged();
+                            }
+                        });
+        recView.addOnItemTouchListener(swipeTouchListener);*/
+
+
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                la.onItemRemove(viewHolder, recView);
+            }
+
+            @Override
+            public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, int fromPos, RecyclerView.ViewHolder target, int toPos, int x, int y) {
+                super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(recView);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -82,36 +170,29 @@ public class MainActivity extends AppCompatActivity
 
         admin_name.setText(as.getAdminSession().getName());
         admin_steamid.setText(as.getAdminSession().getSteamid());
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
-        mSwipeRefreshLayout.setColorSchemeColors(R.color.blue, R.color.green, R.color.purple);
-        mSwipeRefreshLayout.setOnRefreshListener(
-            new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-                    // This method performs the actual data-refresh operation.
-                    // The method calls setRefreshing(false) when it's finished.
-                    handle_list();
-                }
-            }
-        );
     }
-
 
     public void handle_list(){
 
         try{
-            list = new AsyncList(this).execute().get();
+            list = new AsyncList().execute().get();
         }catch (Exception e){
             e.getStackTrace();
         }
 
+        la = new ListAdapter(list);
+        recView.setAdapter(la);
+
         if(list != null){
-            ListAdapter la = new ListAdapter(list);
-            recView.setAdapter(la);
+            status.setVisibility(View.GONE);
         }else{
             status.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
@@ -157,16 +238,9 @@ public class MainActivity extends AppCompatActivity
 
     public class AsyncList extends AsyncTask<Void, Void, ArrayList<Report>> {
 
-        private Activity activity;
-        ArrayList<Report> list;
-
-        public AsyncList(Activity activity){
-            this.activity = activity;
-            list = new ArrayList<>();
-        }
-
         @Override
         protected ArrayList<Report> doInBackground(Void... params) {
+            ArrayList<Report> list = new ArrayList<>();
 
             HTTPReportRequest rr = new HTTPReportRequest();
             String s = rr.connect();
@@ -174,9 +248,9 @@ public class MainActivity extends AppCompatActivity
             if(s.equals("404")){
                 return null;
             }
-            Log.v("Connect String: ", "" + s);
+
             String[] fetch_sep_report = s.split("</br>");
-            Log.v("Fetch Sep String: ", "" + Arrays.toString(fetch_sep_report));
+            Log.v("Fetch Sep String: ", Arrays.toString(fetch_sep_report));
             for(int i = 0; i < fetch_sep_report.length; i++){
                 String[] temp = fetch_sep_report[i].split("\\|");
 
@@ -192,14 +266,30 @@ public class MainActivity extends AppCompatActivity
             return list;
         }
 
-
-
-
         @Override
         protected void onPostExecute(ArrayList<Report> result) {
             super.onPostExecute(result);
 
             mSwipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+    public class UpdateDataTask extends AsyncTask<String, Void, Void> {
+
+        private String link;
+        private String value;
+        UpdateDataTask(String link, String value){
+            this.link = link;
+            this.value = value;
+        }
+
+        protected final Void doInBackground(String... params) {
+            HashMap<String, String> list = new HashMap<>();
+            list.put("key", Utility.KEY);
+            list.put("id", params[0]);
+            list.put("complete", value);
+            new HTTPUpdateData(link).update_data(list);
+            return null;
         }
     }
 }

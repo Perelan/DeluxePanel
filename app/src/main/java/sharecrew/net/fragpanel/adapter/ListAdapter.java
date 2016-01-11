@@ -1,18 +1,24 @@
 package sharecrew.net.fragpanel.adapter;
 
 import android.annotation.TargetApi;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +38,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     private ArrayList<Report> mDataset = null;
     private Admin admin;
     private final String TAG = "******* List Adapter";
+    private ArrayList<Report> reportToDelete;
 
     public ListAdapter(ArrayList<Report> mDataset) {
         this.mDataset = mDataset;
@@ -41,7 +48,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.report_list, parent, false);
         admin = new AdminSession(v.getContext()).getAdminSession();
-
+        reportToDelete = new ArrayList<>();
         return new ViewHolder(v);
     }
 
@@ -88,6 +95,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         }
     }
 
+    public ArrayList<Report> getReportToDelete() {
+        return reportToDelete;
+    }
+
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -96,6 +107,44 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     @Override
     public int getItemCount() {
         return mDataset == null ? 0 : mDataset.size();
+    }
+
+    public void onItemRemove(final RecyclerView.ViewHolder viewHolder, final RecyclerView recyclerView){
+        int adapterPosition = viewHolder.getAdapterPosition();
+        final Report mReport = mDataset.get(adapterPosition);
+
+        Snackbar snackbak = Snackbar
+                .make(viewHolder.itemView, "Given report has been removed. Restore it while you can. :)", Snackbar.LENGTH_LONG)
+                .setAction("UNDO", new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        System.out.println(viewHolder.getAdapterPosition());
+                        int mAdapterPosition = viewHolder.getAdapterPosition() + 1;
+                        mDataset.add(mAdapterPosition , mReport);
+                        notifyItemInserted(mAdapterPosition);
+                        recyclerView.scrollToPosition(mAdapterPosition);
+                        reportToDelete.remove(mReport);
+
+                        HashMap<String, String> data_to_send = new HashMap<>();
+                        data_to_send.put("id", mReport.getReport_id());
+                        data_to_send.put("complete", "0");
+                        new UpdateDataTask("update_report.php?").execute(data_to_send);
+
+                    }
+                }).setActionTextColor(Color.RED);
+
+        snackbak.show();
+        mDataset.remove(adapterPosition);
+        notifyItemRemoved(adapterPosition);
+        reportToDelete.add(mReport);
+
+        for(int i = 0; i < reportToDelete.size(); i++){
+            HashMap<String, String> data_to_send = new HashMap<>();
+            data_to_send.put("id", reportToDelete.get(i).getReport_id());
+            data_to_send.put("complete", "1");
+            new UpdateDataTask("update_report.php?").execute(data_to_send);
+        }
     }
 
     /**
@@ -143,6 +192,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             uparrow.setOnClickListener(this);
             downarrow.setOnClickListener(this);
             claim.setOnClickListener(this);
+
             v.setOnClickListener(this);
         }
 
@@ -150,6 +200,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         @Override
         public void onClick(View v) {
+
             // Handle the claim button
             if(v.getId() == R.id.claim_btn) {
                 admin_name.setText(admin.getName());
@@ -159,13 +210,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 mute.setVisibility(View.VISIBLE);
                 kick.setVisibility(View.VISIBLE);
                 ban.setVisibility(View.VISIBLE);
-                // Handle karma upvote and downvote
+            // Handle karma upvote and downvote
             }else if (v.getId() == R.id.uparrow || v.getId() == R.id.downarrow) {
                 if (!admin_name.getText().equals(admin.getName())) {
                     Toast.makeText(v.getContext(), "You've to be the claiming admin to do that!",
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    int karma_count = Integer.parseInt((String) karma.getText());
+                    int karma_count = Integer.parseInt(karma.getText().toString());
 
                     if (v.getId() == R.id.uparrow) {
                         if (isRepPressed) {
@@ -188,15 +239,16 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                     karma.setText(String.format("%s", karma_count));
                     isRepPressed = true;
 
-                    data_to_send.put("user", (String) reporting_id.getText());
-                    data_to_send.put("karma", (String) karma.getText());
+                    data_to_send.put("user", reporting_id.getText().toString());
+                    data_to_send.put("karma", karma.getText().toString());
                     new UpdateDataTask("update_karma.php?").execute(data_to_send);
                 }
-                // Handle the expand view (able to press the whole card to expand).
+            // Handle the expand view (able to press the whole card to expand).
             }else if(v.getId() == R.id.ban_btn || v.getId() == R.id.mute_btn || v.getId() == R.id.kick_btn){
                 // STEAM ID - COMMAND - SERVER
-                data_to_send.put("server", (String) server_name.getText());
-                data_to_send.put("steamid", (String) suspect_steamid.getText());
+
+                data_to_send.put("server", server_name.getText().toString().substring(1, server_name.getText().toString().length()));
+                data_to_send.put("steamid", suspect_steamid.getText().toString());
 
                 if(v.getId() == R.id.ban_btn)
                     data_to_send.put("command", "ban");

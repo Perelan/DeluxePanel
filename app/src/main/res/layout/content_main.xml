@@ -110,6 +110,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="No Entries"
         android:id="@+id/status_message"
+        android:visibility="gone"
         android:layout_below="@+id/relativeLayout"
         android:layout_centerHorizontal="true"
         android:textColor="@android:color/white"/>
