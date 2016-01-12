@@ -1,7 +1,11 @@
 package sharecrew.net.fragpanel.adapter;
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -9,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,16 +21,26 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.simplelist.MaterialSimpleListAdapter;
+import com.afollestad.materialdialogs.simplelist.MaterialSimpleListItem;
 import com.squareup.picasso.Picasso;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import sharecrew.net.fragpanel.R;
 import sharecrew.net.fragpanel.extra.Utility;
@@ -193,6 +208,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             downarrow.setOnClickListener(this);
             claim.setOnClickListener(this);
 
+            kick.setOnClickListener(this);
+            ban.setOnClickListener(this);
+            mute.setOnClickListener(this);
+
             v.setOnClickListener(this);
         }
 
@@ -247,6 +266,63 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             }else if(v.getId() == R.id.ban_btn || v.getId() == R.id.mute_btn || v.getId() == R.id.kick_btn){
                 // STEAM ID - COMMAND - SERVER
 
+                LayoutInflater li = LayoutInflater.from(v.getContext());
+                View promptsView = li.inflate(R.layout.popup_display, null);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
+                alertDialogBuilder.setView(promptsView);
+                // set dialog message
+
+                alertDialogBuilder
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User clicked OK, so save the mSelectedItems results somewhere
+                                // or return them to the component that opened the dialog
+                            }
+                        })
+                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
+
+                // create alert dialog
+                final AlertDialog alertDialog = alertDialogBuilder.create();
+
+                final NumberPicker np = (NumberPicker) promptsView.findViewById(R.id.numberPicker);
+                np.setMaxValue(100);
+                np.setMinValue(0);
+
+                setNumberPickerTextColor(np, Color.WHITE);
+
+                final Spinner mSpinner = (Spinner) promptsView
+                        .findViewById(R.id.popspinner);
+
+                List<String> list = new ArrayList<String>();
+                list.add("Pick a command:");
+                list.add("Mute");
+                list.add("Silence");
+                list.add("Gag");
+
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>
+                        (v.getContext(), R.layout.spinner_item,list);
+
+                dataAdapter.setDropDownViewResource
+                        (android.R.layout.simple_spinner_dropdown_item);
+
+                mSpinner.setAdapter(dataAdapter);
+
+
+                // reference UI elements from my_dialog_layout in similar fashion
+
+                // show it
+                alertDialog.show();
+                alertDialog.setCanceledOnTouchOutside(true);
+
+
+
+                /*
                 data_to_send.put("server", server_name.getText().toString().substring(1, server_name.getText().toString().length()));
                 data_to_send.put("steamid", suspect_steamid.getText().toString());
 
@@ -258,7 +334,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                     data_to_send.put("command", "mute");
 
 
-                new UpdateDataTask("handle_command.php?").execute(data_to_send);
+                new UpdateDataTask("handle_command.php?").execute(data_to_send);*/
             } else {
                 if (!isExpanded) {
                     expandUp.setVisibility(View.VISIBLE);
@@ -273,6 +349,35 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 }
             }
         }
+
+        /**
+         * A method i took for the web to change the color of the values inside of the NumberPicker
+         */
+        public boolean setNumberPickerTextColor(NumberPicker numberPicker, int color) {
+            final int count = numberPicker.getChildCount();
+            for (int i = 0; i < count; i++) {
+                View child = numberPicker.getChildAt(i);
+                if (child instanceof EditText) {
+                    try {
+                        Field selectorWheelPaintField = numberPicker.getClass()
+                                .getDeclaredField("mSelectorWheelPaint");
+                        selectorWheelPaintField.setAccessible(true);
+                        ((Paint) selectorWheelPaintField.get(numberPicker)).setColor(color);
+                        ((EditText) child).setTextColor(color);
+                        numberPicker.invalidate();
+                        return true;
+                    } catch (NoSuchFieldException e) {
+                        Log.w("setNumberPickerText", e);
+                    } catch (IllegalAccessException e) {
+                        Log.w("setNumberPickerText", e);
+                    } catch (IllegalArgumentException e) {
+                        Log.w("setNumberPickerText", e);
+                    }
+                }
+            }
+            return false;
+        }
+        ////////////////////////////////////////////////////////////////////////
     }
 
     /**

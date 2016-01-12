@@ -78,60 +78,6 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
         );
-        /*
-        SwipeableRecyclerViewTouchListener swipeTouchListener =
-                new SwipeableRecyclerViewTouchListener(recView,
-                        new SwipeableRecyclerViewTouchListener.SwipeListener() {
-                            @Override
-                            public boolean canSwipe(int position) {
-                                return true;
-                            }
-
-                            @Override
-                            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
-                                handle_action(recyclerView, reverseSortedPositions);
-                            }
-
-                            @Override
-                            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
-                                handle_action(recyclerView, reverseSortedPositions);
-                                la.onItemRemove(viewHolder, recView);
-
-                            }
-
-                            public void handle_action(RecyclerView recyclerView, int[] reverseSortedPositions){
-                                for(final int position : reverseSortedPositions){
-                                    final ArrayList<Report> temp = new ArrayList<>(list.size());
-                                    temp.add(list.get(position));
-
-                                    new UpdateDataTask("update_report.php?", "1").execute(list.get(position).getReport_id());
-                                    final int store_position = position;
-                                    list.remove(position);
-                                    la.notifyItemRemoved(position);
-
-                                    Snackbar snackbak = Snackbar.make(recyclerView, "The report were removed! Restore it while you can.", Snackbar.LENGTH_LONG);
-                                    snackbak.setAction("UNDO", new View.OnClickListener() {
-
-                                                @Override
-                                                public void onClick(View view) {
-                                                    for (int i = 0; i < temp.size(); i++) {
-                                                        list.add(temp.get(i));
-                                                    }
-
-                                                    System.out.println(list);
-
-                                                    new UpdateDataTask("update_report.php?", "0").execute(list.get(store_position).getReport_id());
-                                                    la.notifyItemInserted(position);
-                                                }
-                                            }).setActionTextColor(Color.RED);
-
-                                    snackbak.show();
-                                }
-                                la.notifyDataSetChanged();
-                            }
-                        });
-        recView.addOnItemTouchListener(swipeTouchListener);*/
-
 
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
