@@ -1,11 +1,10 @@
 package sharecrew.net.fragpanel.activity;
 
 import android.content.Intent;
-import android.graphics.Color;
+import android.graphics.Canvas;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -18,21 +17,16 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
-import sharecrew.net.fragpanel.extra.Utility;
 import sharecrew.net.fragpanel.login.Admin;
 import sharecrew.net.fragpanel.reports.HTTPFetchSteam;
 import sharecrew.net.fragpanel.reports.HTTPReportRequest;
-import sharecrew.net.fragpanel.reports.HTTPUpdateData;
 import sharecrew.net.fragpanel.reports.Report;
 import sharecrew.net.fragpanel.R;
 import sharecrew.net.fragpanel.adapter.ListAdapter;
@@ -66,11 +60,11 @@ public class MainActivity extends AppCompatActivity
         recView.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(this);
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-        llm.setReverseLayout(true);
-        llm.setStackFromEnd(true);
         recView.setLayoutManager(llm);
 
         handle_list();
+
+        la.setRecylerview(recView); // Set recyclerview inside of adapter to manage scrolltolocation
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         mSwipeRefreshLayout.setOnRefreshListener(
@@ -101,21 +95,33 @@ public class MainActivity extends AppCompatActivity
         admin_steamid.setText(as.getAdminSession().getSteamid());
 
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                 return false;
             }
 
             @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
                 String admin_name = list.get(viewHolder.getAdapterPosition()).getAdmin_name();
+                final int swipeFlags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+                return !admin_name.equals(admin.getName()) ? 0 : makeMovementFlags(0, swipeFlags);
+            }
 
-                if(admin_name.equals(admin.getName()))
-                    la.onItemRemove(viewHolder, recView);
-                else
-                    Toast.makeText(MainActivity.this, "You cannot perform this action!", Toast.LENGTH_LONG).show();
+            @Override
+            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    // Fade out the view as it is swiped out of the parent's bounds
+                    final float alpha = 1.0f - Math.abs(dX) / (float) viewHolder.itemView.getWidth();
+                    viewHolder.itemView.setAlpha(alpha);
+                    viewHolder.itemView.setTranslationX(dX);
+                } else {
+                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                }
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                la.onItemRemove(viewHolder, recView);
             }
 
             @Override
@@ -131,17 +137,16 @@ public class MainActivity extends AppCompatActivity
 
         try{
             list = new AsyncList().execute().get();
+            la = new ListAdapter(list);
+            recView.setAdapter(la);
+
+            if(list != null){
+                status.setVisibility(View.GONE);
+            }else{
+                status.setVisibility(View.VISIBLE);
+            }
         }catch (Exception e){
             e.getStackTrace();
-        }
-
-        la = new ListAdapter(list);
-        recView.setAdapter(la);
-
-        if(list != null){
-            status.setVisibility(View.GONE);
-        }else{
-            status.setVisibility(View.VISIBLE);
         }
     }
 
@@ -163,7 +168,6 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
-
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override

@@ -20,6 +20,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -105,6 +108,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 
     }
 
+    private RecyclerView recView;
+
+    public void setRecylerview(RecyclerView view){
+        recView = view;
+    }
+
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -161,7 +170,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         TextView server_name, admin_name, date, suspect_name, suspect_steamid,
                 reporting_id, reporting_name, reason, karma, task;
         ImageView suspected_pic, reporting_pic;
-        ViewGroup expandable;
+        RelativeLayout expandable;
         ImageView expandDown, expandUp, uparrow, downarrow;
         boolean isExpanded, isRepPressed;
         Button command, claim;
@@ -182,7 +191,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             task            = (TextView) v.findViewById(R.id.taken_txt);
             suspected_pic   = (ImageView) v.findViewById(R.id.suspect_avatar);
             reporting_pic   = (ImageView) v.findViewById(R.id.reporter_avatar);
-            expandable      = (ViewGroup) v.findViewById(R.id.expandable_part_layout);
+            expandable      = (RelativeLayout) v.findViewById(R.id.expandable_part_layout);
             expandDown      = (ImageView) v.findViewById(R.id.expandDown);
             expandUp        = (ImageView) v.findViewById(R.id.expandUp);
             uparrow         = (ImageView) v.findViewById(R.id.uparrow);
@@ -284,7 +293,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 
                 final EditText edit = (EditText) promptsView.findViewById(R.id.editText);
                 edit.setTextColor(Color.WHITE);
-                edit.getBackground().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+                edit.getBackground().setColorFilter(Color.LTGRAY, PorterDuff.Mode.SRC_ATOP);
 
                 mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -339,15 +348,26 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 alertDialog.setCanceledOnTouchOutside(true);
 
             } else {
+
                 if (!isExpanded) {
                     expandUp.setVisibility(View.VISIBLE);
                     expandDown.setVisibility(View.GONE);
+
+                    Animation animFadeIn = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_in);
+                    expandable.setAnimation(animFadeIn);
                     expandable.setVisibility(View.VISIBLE);
+
+                    recView.scrollToPosition(this.getAdapterPosition());
+
                     isExpanded = true;
                 } else {
                     expandUp.setVisibility(View.GONE);
                     expandDown.setVisibility(View.VISIBLE);
+
+                    Animation animFadeOut = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_out);
+                    expandable.setAnimation(animFadeOut);
                     expandable.setVisibility(View.GONE);
+
                     isExpanded = false;
                 }
             }
