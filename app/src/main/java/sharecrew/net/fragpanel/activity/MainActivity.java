@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import sharecrew.net.fragpanel.extra.Utility;
+import sharecrew.net.fragpanel.login.Admin;
 import sharecrew.net.fragpanel.reports.HTTPFetchSteam;
 import sharecrew.net.fragpanel.reports.HTTPReportRequest;
 import sharecrew.net.fragpanel.reports.HTTPUpdateData;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
     private AdminSession as;
+    private Admin admin;
     private TextView admin_name;
     private TextView admin_steamid;
     private ArrayList<Report> list;
@@ -79,6 +82,24 @@ public class MainActivity extends AppCompatActivity
                 }
         );
 
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        as = new AdminSession(this);
+        admin = as.getAdminSession();
+
+        admin_name = (TextView) findViewById(R.id.admin_name);
+        admin_steamid = (TextView) findViewById(R.id.admin_steamid);
+
+        admin_name.setText(as.getAdminSession().getName());
+        admin_steamid.setText(as.getAdminSession().getSteamid());
+
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
             @Override
@@ -88,7 +109,13 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                la.onItemRemove(viewHolder, recView);
+
+                String admin_name = list.get(viewHolder.getAdapterPosition()).getAdmin_name();
+
+                if(admin_name.equals(admin.getName()))
+                    la.onItemRemove(viewHolder, recView);
+                else
+                    Toast.makeText(MainActivity.this, "You cannot perform this action!", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -96,26 +123,8 @@ public class MainActivity extends AppCompatActivity
                 super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
             }
         };
-
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recView);
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        as = new AdminSession(this);
-
-        admin_name = (TextView) findViewById(R.id.admin_name);
-        admin_steamid = (TextView) findViewById(R.id.admin_steamid);
-
-        admin_name.setText(as.getAdminSession().getName());
-        admin_steamid.setText(as.getAdminSession().getSteamid());
     }
 
     public void handle_list(){
@@ -134,11 +143,6 @@ public class MainActivity extends AppCompatActivity
         }else{
             status.setVisibility(View.VISIBLE);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
     }
 
     @Override
@@ -217,25 +221,6 @@ public class MainActivity extends AppCompatActivity
             super.onPostExecute(result);
 
             mSwipeRefreshLayout.setRefreshing(false);
-        }
-    }
-
-    public class UpdateDataTask extends AsyncTask<String, Void, Void> {
-
-        private String link;
-        private String value;
-        UpdateDataTask(String link, String value){
-            this.link = link;
-            this.value = value;
-        }
-
-        protected final Void doInBackground(String... params) {
-            HashMap<String, String> list = new HashMap<>();
-            list.put("key", Utility.KEY);
-            list.put("id", params[0]);
-            list.put("complete", value);
-            new HTTPUpdateData(link).update_data(list);
-            return null;
         }
     }
 }

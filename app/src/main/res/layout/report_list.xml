@@ -240,45 +240,27 @@
                 android:id="@+id/reporter" />
 
 
-                <LinearLayout
+            <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_horizontal|center"
                     android:layout_marginTop="25dp"
-                    android:layout_marginLeft="10dp">
+                    android:layout_marginLeft="30dp"
+                android:id="@+id/linearLayout">
 
-                    <Button
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="60dp"
-                        android:layout_height="wrap_content"
-                        android:text="M.G.S"
-                        android:id="@+id/mute_btn"
-                        android:background="@color/colorAccent"
-                        android:textColor="@android:color/white"
-                        android:clickable="true" />
-
-                    <Button
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="60dp"
-                        android:layout_height="wrap_content"
-                        android:text="Kick"
-                        android:id="@+id/kick_btn"
-                        android:background="@color/colorAccent"
-                        android:textColor="@android:color/white"
-                        android:clickable="true"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp" />
-
-                    <Button
-                        style="?android:attr/buttonStyleSmall"
-                        android:layout_width="60dp"
-                        android:layout_height="wrap_content"
-                        android:text="Ban"
-                        android:id="@+id/ban_btn"
-                        android:background="@color/colorAccent"
-                        android:textColor="@android:color/white"
-                        android:clickable="true" />
-                </LinearLayout>
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="EXECUTE COMMAND"
+                    android:id="@+id/command_btn"
+                    android:background="@color/colorAccent"
+                    android:textColor="@android:color/white"
+                    android:clickable="true"
+                    android:layout_below="@+id/linearLayout"
+                    android:layout_toRightOf="@+id/taken_txt"
+                    android:layout_toEndOf="@+id/taken_txt" />
+            </LinearLayout>
 
             <Button
                 android:layout_width="wrap_content"

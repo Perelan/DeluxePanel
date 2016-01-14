@@ -31,10 +31,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.AlertDialogWrapper;
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.afollestad.materialdialogs.simplelist.MaterialSimpleListAdapter;
-import com.afollestad.materialdialogs.simplelist.MaterialSimpleListItem;
 import com.squareup.picasso.Picasso;
 
 import java.lang.reflect.Field;
@@ -93,25 +89,16 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 
         if(mDataset.get(position).getAdmin_name().equals("null")){
             holder.claim.setVisibility(View.VISIBLE);
-            holder.kick.setVisibility(View.GONE);
-            holder.ban.setVisibility(View.GONE);
-            holder.mute.setVisibility(View.GONE);
+            holder.command.setVisibility(View.GONE);
         }else if(!mDataset.get(position).getAdmin_name().equals(admin.getName())){
             holder.task.setVisibility(View.VISIBLE);
             holder.claim.setVisibility(View.GONE);
-            holder.kick.setVisibility(View.GONE);
-            holder.ban.setVisibility(View.GONE);
-            holder.mute.setVisibility(View.GONE);
+            holder.command.setVisibility(View.GONE);
         }else{
             holder.claim.setVisibility(View.GONE);
-            holder.kick.setVisibility(View.VISIBLE);
-            holder.ban.setVisibility(View.VISIBLE);
-            holder.mute.setVisibility(View.VISIBLE);
+            holder.command.setVisibility(View.VISIBLE);
         }
-    }
 
-    public ArrayList<Report> getReportToDelete() {
-        return reportToDelete;
     }
 
     @Override
@@ -173,7 +160,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         ViewGroup expandable;
         ImageView expandDown, expandUp, uparrow, downarrow;
         boolean isExpanded, isRepPressed;
-        Button mute, kick, ban, claim;
+        Button command, claim;
         HashMap<String, String> data_to_send;
 
         public ViewHolder(View v) {
@@ -197,9 +184,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             uparrow         = (ImageView) v.findViewById(R.id.uparrow);
             downarrow       = (ImageView) v.findViewById(R.id.downarrow);
             isExpanded      = false;
-            mute            = (Button) v.findViewById(R.id.mute_btn);
-            kick            = (Button) v.findViewById(R.id.kick_btn);
-            ban             = (Button) v.findViewById(R.id.ban_btn);
+            command         = (Button) v.findViewById(R.id.command_btn);
             claim           = (Button) v.findViewById(R.id.claim_btn);
             isRepPressed    = false;
             data_to_send    = new HashMap<>();
@@ -208,9 +193,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             downarrow.setOnClickListener(this);
             claim.setOnClickListener(this);
 
-            kick.setOnClickListener(this);
-            ban.setOnClickListener(this);
-            mute.setOnClickListener(this);
+            command.setOnClickListener(this);
 
             v.setOnClickListener(this);
         }
@@ -226,9 +209,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 admin_name.setTypeface(null, Typeface.NORMAL);
 
                 claim.setVisibility(View.GONE);
-                mute.setVisibility(View.VISIBLE);
-                kick.setVisibility(View.VISIBLE);
-                ban.setVisibility(View.VISIBLE);
+                command.setVisibility(View.VISIBLE);
             // Handle karma upvote and downvote
             }else if (v.getId() == R.id.uparrow || v.getId() == R.id.downarrow) {
                 if (!admin_name.getText().equals(admin.getName())) {
@@ -263,7 +244,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                     new UpdateDataTask("update_karma.php?").execute(data_to_send);
                 }
             // Handle the expand view (able to press the whole card to expand).
-            }else if(v.getId() == R.id.ban_btn || v.getId() == R.id.mute_btn || v.getId() == R.id.kick_btn){
+            }else if(v.getId() == R.id.command_btn){
                 // STEAM ID - COMMAND - SERVER
 
                 LayoutInflater li = LayoutInflater.from(v.getContext());
@@ -272,6 +253,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
                 alertDialogBuilder.setView(promptsView);
                 // set dialog message
+               // LinearLayout ll = (LinearLayout) promptsView.findViewById(R.id.hidethispart);
+               // ll.setVisibility(View.GONE);
 
                 alertDialogBuilder
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -291,7 +274,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 final AlertDialog alertDialog = alertDialogBuilder.create();
 
                 final NumberPicker np = (NumberPicker) promptsView.findViewById(R.id.numberPicker);
-                np.setMaxValue(100);
+                np.setMaxValue(120);
                 np.setMinValue(0);
 
                 setNumberPickerTextColor(np, Color.WHITE);
@@ -301,9 +284,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 
                 List<String> list = new ArrayList<String>();
                 list.add("Pick a command:");
+                list.add("Innocent");
                 list.add("Mute");
                 list.add("Silence");
                 list.add("Gag");
+                list.add("Kick");
+                list.add("Ban");
 
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>
                         (v.getContext(), R.layout.spinner_item,list);
@@ -321,17 +307,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 alertDialog.setCanceledOnTouchOutside(true);
 
 
-
                 /*
                 data_to_send.put("server", server_name.getText().toString().substring(1, server_name.getText().toString().length()));
                 data_to_send.put("steamid", suspect_steamid.getText().toString());
-
-                if(v.getId() == R.id.ban_btn)
-                    data_to_send.put("command", "ban");
-                else if(v.getId() == R.id.kick_btn)
-                    data_to_send.put("command", "kick");
-                else
-                    data_to_send.put("command", "mute");
+                data_to_send.put("duration", np.valueOf
 
 
                 new UpdateDataTask("handle_command.php?").execute(data_to_send);*/

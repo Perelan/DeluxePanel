@@ -2,24 +2,73 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorAccent">
+    android:background="@color/colorPrimary">
 
-    <NumberPicker
-        android:id="@+id/numberPicker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="64dp"
-        android:textColorPrimary="#FFFFFF"/>
+
 
     <Spinner
-        android:layout_width="200dp"
+        android:layout_width="220dp"
         android:layout_height="wrap_content"
         android:id="@+id/popspinner"
         android:layout_gravity="center_vertical"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_margin="20dp" />
+        android:layout_margin="15dp" />
+
+    <RelativeLayout
+        android:id="@+id/hidethispart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mintues"
+            android:textSize="20sp"
+            android:id="@+id/textView3"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="bottom"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/numberPicker"
+            android:layout_toEndOf="@+id/numberPicker"
+            android:layout_marginLeft="10dp" />
+
+        <NumberPicker
+            android:id="@+id/numberPicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColorPrimary="#FFFFFF"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:ems="10"
+            android:id="@+id/editText"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:layout_below="@+id/numberPicker"
+            android:layout_alignRight="@+id/textView3"
+            android:layout_alignEnd="@+id/textView3"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reason"
+            android:id="@+id/textView4"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="bottom"
+            android:layout_alignBottom="@+id/editText"
+            android:layout_toLeftOf="@+id/editText"
+            android:layout_toStartOf="@+id/editText"
+            android:layout_marginRight="10dp" />
+    </RelativeLayout>
+
 
 </RelativeLayout>
