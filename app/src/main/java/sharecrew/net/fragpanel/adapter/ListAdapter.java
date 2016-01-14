@@ -6,7 +6,9 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -27,6 +29,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import sharecrew.net.fragpanel.R;
+import sharecrew.net.fragpanel.activity.MainActivity;
 import sharecrew.net.fragpanel.extra.Utility;
 import sharecrew.net.fragpanel.login.Admin;
 import sharecrew.net.fragpanel.login.AdminSession;
@@ -201,7 +205,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         @SuppressWarnings("unchecked")
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         @Override
-        public void onClick(View v) {
+        public void onClick(final View v) {
 
             // Handle the claim button
             if(v.getId() == R.id.claim_btn) {
@@ -247,14 +251,57 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             }else if(v.getId() == R.id.command_btn){
                 // STEAM ID - COMMAND - SERVER
 
-                LayoutInflater li = LayoutInflater.from(v.getContext());
-                View promptsView = li.inflate(R.layout.popup_display, null);
+                LayoutInflater inflater = LayoutInflater.from(v.getContext());
+                View promptsView = inflater.inflate(R.layout.popup_display, null);
 
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
                 alertDialogBuilder.setView(promptsView);
-                // set dialog message
-               // LinearLayout ll = (LinearLayout) promptsView.findViewById(R.id.hidethispart);
-               // ll.setVisibility(View.GONE);
+
+                final RelativeLayout rl = (RelativeLayout) promptsView.findViewById(R.id.hidethispart);
+                rl.setVisibility(View.GONE);
+
+                final Spinner mSpinner = (Spinner) promptsView
+                        .findViewById(R.id.popspinner);
+
+                List<String> list = new ArrayList<>();
+                list.add("Pick a command:");
+                list.add("Mute");
+                list.add("Silence");
+                list.add("Gag");
+                list.add("Kick");
+                list.add("Ban");
+
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<>
+                        (v.getContext(), R.layout.spinner_item,list);
+                dataAdapter.setDropDownViewResource
+                        (android.R.layout.simple_spinner_dropdown_item);
+                mSpinner.setAdapter(dataAdapter);
+
+                final NumberPicker np = (NumberPicker) promptsView.findViewById(R.id.numberPicker);
+                np.setMaxValue(3600);
+                np.setMinValue(0);
+                setNumberPickerTextColor(np, Color.WHITE);
+
+                final EditText edit = (EditText) promptsView.findViewById(R.id.editText);
+                edit.setTextColor(Color.WHITE);
+                edit.getBackground().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+
+                mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if (parent.getSelectedItemPosition() > 0) {
+                            rl.setVisibility(View.VISIBLE);
+                            data_to_send.put("command", parent.getSelectedItem().toString());
+                        } else {
+                            rl.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
 
                 alertDialogBuilder
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -262,58 +309,35 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                             public void onClick(DialogInterface dialog, int id) {
                                 // User clicked OK, so save the mSelectedItems results somewhere
                                 // or return them to the component that opened the dialog
+
+                                if (mSpinner.getSelectedItemPosition() != 0) {
+                                    data_to_send.put("reason", edit.getText().toString());
+                                    data_to_send.put("server", server_name.getText().toString().substring(1, server_name.getText().toString().length()));
+                                    data_to_send.put("steamid", suspect_steamid.getText().toString());
+                                    data_to_send.put("duration", Integer.toString(np.getValue()));
+                                    new UpdateDataTask("handle_command.php?").execute(data_to_send);
+                                    Toast.makeText(v.getContext(), "Command executed! (Hopefully)", Toast.LENGTH_LONG).show();
+                                } else {
+                                    Toast.makeText(v.getContext(), "Please pick a command!", Toast.LENGTH_LONG).show();
+                                }
+
+                                dialog.dismiss();
                             }
                         })
                         .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
                             }
                         });
 
                 // create alert dialog
                 final AlertDialog alertDialog = alertDialogBuilder.create();
 
-                final NumberPicker np = (NumberPicker) promptsView.findViewById(R.id.numberPicker);
-                np.setMaxValue(120);
-                np.setMinValue(0);
-
-                setNumberPickerTextColor(np, Color.WHITE);
-
-                final Spinner mSpinner = (Spinner) promptsView
-                        .findViewById(R.id.popspinner);
-
-                List<String> list = new ArrayList<String>();
-                list.add("Pick a command:");
-                list.add("Innocent");
-                list.add("Mute");
-                list.add("Silence");
-                list.add("Gag");
-                list.add("Kick");
-                list.add("Ban");
-
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>
-                        (v.getContext(), R.layout.spinner_item,list);
-
-                dataAdapter.setDropDownViewResource
-                        (android.R.layout.simple_spinner_dropdown_item);
-
-                mSpinner.setAdapter(dataAdapter);
-
-
-                // reference UI elements from my_dialog_layout in similar fashion
-
                 // show it
                 alertDialog.show();
                 alertDialog.setCanceledOnTouchOutside(true);
 
-
-                /*
-                data_to_send.put("server", server_name.getText().toString().substring(1, server_name.getText().toString().length()));
-                data_to_send.put("steamid", suspect_steamid.getText().toString());
-                data_to_send.put("duration", np.valueOf
-
-
-                new UpdateDataTask("handle_command.php?").execute(data_to_send);*/
             } else {
                 if (!isExpanded) {
                     expandUp.setVisibility(View.VISIBLE);
@@ -345,11 +369,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                         ((EditText) child).setTextColor(color);
                         numberPicker.invalidate();
                         return true;
-                    } catch (NoSuchFieldException e) {
-                        Log.w("setNumberPickerText", e);
-                    } catch (IllegalAccessException e) {
-                        Log.w("setNumberPickerText", e);
-                    } catch (IllegalArgumentException e) {
+                    } catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException e) {
                         Log.w("setNumberPickerText", e);
                     }
                 }
@@ -357,6 +377,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             return false;
         }
         ////////////////////////////////////////////////////////////////////////
+
     }
 
     /**

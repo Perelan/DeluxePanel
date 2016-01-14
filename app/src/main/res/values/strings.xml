@@ -20,6 +20,8 @@
         completions."
     </string>
 
+    <string name="edittext_hint"><font size="12">specify reason for command</font></string>
+
     <string name="transition_change">Change</string>
 
     <!-- TODO: Remove or change this placeholder text -->
