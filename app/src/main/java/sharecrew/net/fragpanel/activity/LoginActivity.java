@@ -31,6 +31,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +42,7 @@ import sharecrew.net.fragpanel.R;
 import sharecrew.net.fragpanel.login.Admin;
 import sharecrew.net.fragpanel.login.AdminSession;
 import sharecrew.net.fragpanel.login.HTTPLoginRequest;
+import sharecrew.net.fragpanel.reports.HTTPFetchSteam;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -333,12 +337,28 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 return false;
             }
 
-            String[] store = info.split("\\-");
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(info);
 
-            Log.v("*** Fetched Admin Info", "" + Arrays.toString(store));
+                String admin_id         = jsonObject.get("admin_id").toString();
+                String admin_name       = jsonObject.get("admin_name").toString();
+                String admin_steam_id   = jsonObject.get("admin_steam_id").toString();
+                String admin_steam_id64 = jsonObject.get("admin_steam_id64").toString();
+                String admin_username   = jsonObject.get("admin_username").toString();
+                String admin_password   = jsonObject.get("admin_password").toString();
+                String superadmin       = jsonObject.get("superadmin").toString();
+                String avatar           = new HTTPFetchSteam(admin_steam_id64).fetch_steam_avatar();
 
-            as.setAdminSession(new Admin(store[1], store[2], store[3], store[4]));
-            as.setAdminLoggedIn(true);
+                System.out.println(admin_steam_id64);
+                System.out.println(avatar);
+
+                as.setAdminSession(new Admin(admin_id, admin_name, admin_steam_id, admin_steam_id64,
+                                    admin_username, admin_password, superadmin, avatar));
+                as.setAdminLoggedIn(true);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             return true;
         }

@@ -140,10 +140,9 @@
                 android:layout_height="20dp"
                 android:id="@+id/hammer_img"
                 android:src="@drawable/hammer"
-                android:layout_alignTop="@+id/reason_text"
-                android:layout_toRightOf="@+id/admin_img"
-                android:layout_toEndOf="@+id/admin_img"
-                android:layout_marginLeft="5dp" />
+                android:layout_above="@+id/suspect_report_count"
+                android:layout_alignRight="@+id/admin_name"
+                android:layout_alignEnd="@+id/admin_name" />
 
             <TextView
                 android:layout_width="250dp"
@@ -151,11 +150,10 @@
                 android:text="reason message reason message reason message"
                 android:textColor="@android:color/white"
                 android:id="@+id/reason_text"
-                android:layout_alignTop="@+id/suspect_avatar"
-                android:layout_toRightOf="@+id/hammer_img"
+                android:layout_alignTop="@+id/hammer_img"
                 android:layout_toEndOf="@+id/hammer_img"
                 android:layout_alignBottom="@+id/suspect_avatar"
-                android:layout_marginLeft="5dp" />
+                android:layout_toRightOf="@+id/hammer_img" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -166,6 +164,18 @@
                 android:layout_toLeftOf="@+id/hammer_img"
                 android:layout_toStartOf="@+id/hammer_img"
                 android:visibility="gone"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:id="@+id/suspect_report_count"
+                android:textSize="20sp"
+                android:textColor="#FFF"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/suspect_avatar"
+                android:layout_toEndOf="@+id/suspect_avatar"
+                android:layout_marginLeft="5dp" />
         </RelativeLayout>
 
         <!-- EXPANDED CARDVIEW -->
@@ -245,7 +255,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_horizontal|center"
                     android:layout_marginTop="25dp"
-                    android:layout_marginLeft="30dp"
+                    android:layout_marginLeft="40dp"
                 android:id="@+id/linearLayout">
 
                 <Button
@@ -259,23 +269,22 @@
                     android:clickable="true"
                     android:layout_below="@+id/linearLayout"
                     android:layout_toRightOf="@+id/taken_txt"
+                    android:layout_toEndOf="@+id/taken_txt"
+                    android:visibility="gone" />
+
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="CLAIM "
+                    android:id="@+id/claim_btn"
+                    android:background="@color/colorAccent"
+                    android:textColor="@android:color/white"
+                    android:clickable="true"
+                    android:layout_below="@+id/linearLayout"
+                    android:layout_toRightOf="@+id/taken_txt"
                     android:layout_toEndOf="@+id/taken_txt" />
             </LinearLayout>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Claim"
-                android:id="@+id/claim_btn"
-                android:background="@color/colorAccent"
-                android:textColor="@android:color/white"
-                android:clickable="true"
-                android:layout_marginLeft="55dp"
-                android:layout_marginStart="100dp"
-                android:layout_alignTop="@+id/reporter_avatar"
-                android:layout_toRightOf="@+id/taken_txt"
-                android:layout_toEndOf="@+id/taken_txt"
-                android:visibility="gone"/>
 
             <TextView
                 android:layout_width="wrap_content"

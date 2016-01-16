@@ -18,8 +18,15 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,15 +44,16 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
     private AdminSession as;
-    private Admin admin;
     private TextView admin_name;
     private TextView admin_steamid;
+    private TextView admin_steamid64;
     private ArrayList<Report> list;
     private TextView status;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView recView;
     private ListAdapter la;
     private final String TAG = "*** MAIN";
+    private ImageView avatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +62,10 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        as = new AdminSession(this);
+
         status = (TextView) findViewById(R.id.status_message);
+        avatar = (ImageView) findViewById(R.id.icon);
 
         recView = (RecyclerView) findViewById(R.id.recycler_view);
         recView.setHasFixedSize(true);
@@ -85,14 +96,15 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        as = new AdminSession(this);
-        admin = as.getAdminSession();
+        Picasso.with(this).load(as.getAdminSession().getAvatar()).into(avatar);
 
-        admin_name = (TextView) findViewById(R.id.admin_name);
-        admin_steamid = (TextView) findViewById(R.id.admin_steamid);
+        admin_name      = (TextView) findViewById(R.id.admin_name);
+        admin_steamid   = (TextView) findViewById(R.id.admin_steamid);
+        admin_steamid64 = (TextView) findViewById(R.id.steam_id64);
 
         admin_name.setText(as.getAdminSession().getName());
         admin_steamid.setText(as.getAdminSession().getSteamid());
+        admin_steamid64.setText(as.getAdminSession().getSteamid64());
 
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -104,7 +116,7 @@ public class MainActivity extends AppCompatActivity
             public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
                 String admin_name = list.get(viewHolder.getAdapterPosition()).getAdmin_name();
                 final int swipeFlags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-                return !admin_name.equals(admin.getName()) ? 0 : makeMovementFlags(0, swipeFlags);
+                return !admin_name.equals(as.getAdminSession().getName()) ? 0 : makeMovementFlags(0, swipeFlags);
             }
 
             @Override
@@ -203,19 +215,43 @@ public class MainActivity extends AppCompatActivity
                 return null;
             }
 
-            String[] fetch_sep_report = s.split("</br>");
-            Log.v("Fetch Sep String: ", Arrays.toString(fetch_sep_report));
-            for(int i = 0; i < fetch_sep_report.length; i++){
-                String[] temp = fetch_sep_report[i].split("\\|");
+            try {
+                JSONArray jsonArray   = new JSONArray(s);
+                JSONObject jsonObject;
 
-                String reported_avatar  = new HTTPFetchSteam(temp[5]).fetch_steam_avatar();
-                String reporting_avatar = new HTTPFetchSteam(temp[10]).fetch_steam_avatar();
+                Log.v(TAG, "Fetched JSON: " + s);
 
-                list.add(new Report(temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], temp[6], temp[7],
-                                    temp[8], temp[9], temp[10], temp[11], temp[12], temp[13], temp[14],
-                                    reported_avatar, reporting_avatar));
+                for(int i = 0; i < jsonArray.length(); i++){
+                    jsonObject = jsonArray.getJSONObject(i);
+
+                    String report_id                = jsonObject.get("report_id").toString();
+                    String server_info              = jsonObject.get("server_info").toString();
+                    String admin_name               = jsonObject.get("admin_name").toString();
+                    String reported_name            = jsonObject.get("reported_name").toString();
+                    String reported_steam_id        = jsonObject.get("reported_steam_id").toString();
+                    String reported_steam_id64      = jsonObject.get("reported_steam_id64").toString();
+                    String reported_num_reports     = jsonObject.get("reported_num_reports").toString();
+                    String reporting_name           = jsonObject.get("reporting_name").toString();
+                    String reporting_id             = jsonObject.get("reporting_id").toString();
+                    String reporting_steam_id       = jsonObject.get("reporting_steam_id").toString();
+                    String reporting_steam_id64     = jsonObject.get("reporting_steam_id64").toString();
+                    String reporting_karma          = jsonObject.get("reporting_karma").toString();
+                    String reason                   = jsonObject.get("reason").toString();
+                    String complete                 = jsonObject.get("complete").toString();
+                    String register_date            = jsonObject.get("register_date").toString();
+                    String reported_avatar          = new HTTPFetchSteam(reported_steam_id64).fetch_steam_avatar();
+                    String reporting_avatar         = new HTTPFetchSteam(reporting_steam_id64).fetch_steam_avatar();
+
+                    list.add(new Report(report_id, server_info, admin_name,
+                            reported_name, reported_steam_id, reported_steam_id64, reported_num_reports,
+                            reporting_name, reporting_id, reporting_steam_id, reporting_steam_id64, reporting_karma,
+                            reason, complete, register_date, reported_avatar, reporting_avatar
+                            ));
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-            System.out.println(list.toString());
 
             return list;
         }

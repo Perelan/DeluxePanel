@@ -1,5 +1,9 @@
 package sharecrew.net.fragpanel.login;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -8,10 +12,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import sharecrew.net.fragpanel.extra.Utility;
+import sharecrew.net.fragpanel.reports.HTTPReportRequest;
 
 public class HTTPLoginRequest {
 
-    String username, password;
+   private String username, password;
 
     // 10.0.3.2 <-- GenyMotion
 

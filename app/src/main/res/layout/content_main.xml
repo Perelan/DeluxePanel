@@ -77,8 +77,8 @@
                         android:textColor="#CECECE"
                         android:gravity="center_vertical"
                         android:textSize="12sp"
-                        android:text="Count: 0"
-                        android:id="@+id/assignment_count" />
+                        android:text="7125129012312"
+                        android:id="@+id/steam_id64" />
 
                 </LinearLayout>
             </LinearLayout>

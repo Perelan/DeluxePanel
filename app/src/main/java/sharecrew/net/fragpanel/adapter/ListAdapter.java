@@ -27,13 +27,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,6 +71,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.suspect_name.setText(mDataset.get(position).getReported_name());
+        holder.suspect_report_count.setText(mDataset.get(position).getReported_num_reports());
         holder.suspect_steamid.setText(mDataset.get(position).getReported_steam_id());
         holder.reporting_name.setText(mDataset.get(position).getReporting_name());
         holder.reporting_id.setText(mDataset.get(position).getReporting_id());
@@ -80,7 +79,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         holder.server_name.setText(mDataset.get(position).getServer_name());
         holder.karma.setText(mDataset.get(position).getReporting_karma());
         holder.reason.setText(mDataset.get(position).getReason());
-        System.out.println(mDataset.get(position).getReported_avatar());
         Picasso.with(holder.suspected_pic.getContext()).load(mDataset.get(position).getReported_avatar()).into(holder.suspected_pic);
         Picasso.with(holder.reporting_pic.getContext()).load(mDataset.get(position).getReporting_avatar()).into(holder.reporting_pic);
         holder.expandUp.setVisibility(View.GONE);
@@ -144,8 +142,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                         HashMap<String, String> data_to_send = new HashMap<>();
                         data_to_send.put("id", mReport.getReport_id());
                         data_to_send.put("complete", "0");
-                        new UpdateDataTask("update_report.php?").execute(data_to_send);
-
+                        new UpdateDataTask("update_report_complete.php?").execute(data_to_send);
                     }
                 }).setActionTextColor(Color.RED);
 
@@ -158,7 +155,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             HashMap<String, String> data_to_send = new HashMap<>();
             data_to_send.put("id", reportToDelete.get(i).getReport_id());
             data_to_send.put("complete", "1");
-            new UpdateDataTask("update_report.php?").execute(data_to_send);
+            new UpdateDataTask("update_report_complete.php?").execute(data_to_send);
         }
     }
 
@@ -167,7 +164,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
      */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         CardView cv;
-        TextView server_name, admin_name, date, suspect_name, suspect_steamid,
+        TextView server_name, admin_name, date, suspect_name, suspect_steamid, suspect_report_count,
                 reporting_id, reporting_name, reason, karma, task;
         ImageView suspected_pic, reporting_pic;
         RelativeLayout expandable;
@@ -178,29 +175,30 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 
         public ViewHolder(View v) {
             super(v);
-            cv              = (CardView) v.findViewById(R.id.card_view);
-            server_name     = (TextView) v.findViewById(R.id.server_text);
-            admin_name      = (TextView) v.findViewById(R.id.admin_name);
-            date            = (TextView) v.findViewById(R.id.month_text);
-            suspect_name    = (TextView) v.findViewById(R.id.suspect);
-            suspect_steamid = (TextView) v.findViewById(R.id.reported_steamid);
-            reporting_name  = (TextView) v.findViewById(R.id.reporter);
-            reporting_id    = (TextView) v.findViewById(R.id.reporting_id);
-            reason          = (TextView) v.findViewById(R.id.reason_text);
-            karma           = (TextView) v.findViewById(R.id.karma_id);
-            task            = (TextView) v.findViewById(R.id.taken_txt);
-            suspected_pic   = (ImageView) v.findViewById(R.id.suspect_avatar);
-            reporting_pic   = (ImageView) v.findViewById(R.id.reporter_avatar);
-            expandable      = (RelativeLayout) v.findViewById(R.id.expandable_part_layout);
-            expandDown      = (ImageView) v.findViewById(R.id.expandDown);
-            expandUp        = (ImageView) v.findViewById(R.id.expandUp);
-            uparrow         = (ImageView) v.findViewById(R.id.uparrow);
-            downarrow       = (ImageView) v.findViewById(R.id.downarrow);
-            isExpanded      = false;
-            command         = (Button) v.findViewById(R.id.command_btn);
-            claim           = (Button) v.findViewById(R.id.claim_btn);
-            isRepPressed    = false;
-            data_to_send    = new HashMap<>();
+            cv                      = (CardView) v.findViewById(R.id.card_view);
+            server_name             = (TextView) v.findViewById(R.id.server_text);
+            admin_name              = (TextView) v.findViewById(R.id.admin_name);
+            date                    = (TextView) v.findViewById(R.id.month_text);
+            suspect_name            = (TextView) v.findViewById(R.id.suspect);
+            suspect_steamid         = (TextView) v.findViewById(R.id.reported_steamid);
+            suspect_report_count    = (TextView) v.findViewById(R.id.suspect_report_count);
+            reporting_name          = (TextView) v.findViewById(R.id.reporter);
+            reporting_id            = (TextView) v.findViewById(R.id.reporting_id);
+            reason                  = (TextView) v.findViewById(R.id.reason_text);
+            karma                   = (TextView) v.findViewById(R.id.karma_id);
+            task                    = (TextView) v.findViewById(R.id.taken_txt);
+            suspected_pic           = (ImageView) v.findViewById(R.id.suspect_avatar);
+            reporting_pic           = (ImageView) v.findViewById(R.id.reporter_avatar);
+            expandable              = (RelativeLayout) v.findViewById(R.id.expandable_part_layout);
+            expandDown              = (ImageView) v.findViewById(R.id.expandDown);
+            expandUp                = (ImageView) v.findViewById(R.id.expandUp);
+            uparrow                 = (ImageView) v.findViewById(R.id.uparrow);
+            downarrow               = (ImageView) v.findViewById(R.id.downarrow);
+            isExpanded              = false;
+            command                 = (Button) v.findViewById(R.id.command_btn);
+            claim                   = (Button) v.findViewById(R.id.claim_btn);
+            isRepPressed            = false;
+            data_to_send            = new HashMap<>();
 
             uparrow.setOnClickListener(this);
             downarrow.setOnClickListener(this);
@@ -223,6 +221,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 
                 claim.setVisibility(View.GONE);
                 command.setVisibility(View.VISIBLE);
+
+                data_to_send.put("id", mDataset.get(this.getAdapterPosition()).getReport_id());
+                data_to_send.put("admin_id", admin.getId());
+
+                new UpdateDataTask("update_report_admin.php?").execute(data_to_send);
             // Handle karma upvote and downvote
             }else if (v.getId() == R.id.uparrow || v.getId() == R.id.downarrow) {
                 if (!admin_name.getText().equals(admin.getName())) {
@@ -308,7 +311,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {
-
                     }
                 });
 
@@ -357,7 +359,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                     expandable.setAnimation(animFadeIn);
                     expandable.setVisibility(View.VISIBLE);
 
-                    recView.scrollToPosition(this.getAdapterPosition());
+                    //recView.scrollToPosition(this.getAdapterPosition());
 
                     isExpanded = true;
                 } else {

@@ -17,21 +17,29 @@ public class AdminSession {
     public void setAdminSession(Admin a){
         SharedPreferences.Editor spEdit = sp.edit();
 
-        spEdit.putString("name", a.getName());
-        spEdit.putString("steamid", a.getSteamid());
-        spEdit.putString("username", a.getUsername());
-        spEdit.putString("password", a.getPassword());
+        spEdit.putString("id",          a.getId());
+        spEdit.putString("name",        a.getName());
+        spEdit.putString("steamid",     a.getSteamid());
+        spEdit.putString("steamid64",   a.getSteamid64());
+        spEdit.putString("username",    a.getUsername());
+        spEdit.putString("password",    a.getPassword());
+        spEdit.putString("superadmin",  a.getSuperadmin());
+        spEdit.putString("avatar",      a.getAvatar());
 
         spEdit.apply();
     }
 
     public Admin getAdminSession(){
-        String name     = sp.getString("name", "DEFAULT");
-        String steamid  = sp.getString("steamid", "DEFAULT");
-        String username = sp.getString("username", "DEFAULT");
-        String password = sp.getString("password", "DEFAULT");
+        String id           = sp.getString("id", "DEFAULT");
+        String name         = sp.getString("name", "DEFAULT");
+        String steamid      = sp.getString("steamid", "DEFAULT");
+        String steamid64    = sp.getString("steamid64", "DEFAULT");
+        String username     = sp.getString("username", "DEFAULT");
+        String password     = sp.getString("password", "DEFAULT");
+        String superadmin   = sp.getString("superadmin", "DEFAULT");
+        String avatar       = sp.getString("avatar", "DEFAULT");
 
-        return new Admin(name, steamid, username, password);
+        return new Admin(id, name, steamid, steamid64, username, password, superadmin, avatar);
     }
 
     public boolean isLoggedIn() { return sp.getBoolean("logged", false); }
