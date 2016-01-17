@@ -6,8 +6,7 @@
     card_view:cardBackgroundColor="@color/colorPrimary"
     android:layout_margin="10dp"
     android:clickable="true"
-    android:id="@+id/card_view"
-    >
+    android:id="@+id/card_view">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -140,9 +139,11 @@
                 android:layout_height="20dp"
                 android:id="@+id/hammer_img"
                 android:src="@drawable/hammer"
-                android:layout_above="@+id/suspect_report_count"
-                android:layout_alignRight="@+id/admin_name"
-                android:layout_alignEnd="@+id/admin_name" />
+                android:layout_alignTop="@+id/suspect_avatar"
+                android:layout_toRightOf="@+id/suspect_avatar"
+                android:layout_toEndOf="@+id/suspect_avatar"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="5dp" />
 
             <TextView
                 android:layout_width="250dp"
@@ -150,10 +151,9 @@
                 android:text="reason message reason message reason message"
                 android:textColor="@android:color/white"
                 android:id="@+id/reason_text"
-                android:layout_alignTop="@+id/hammer_img"
-                android:layout_toEndOf="@+id/hammer_img"
-                android:layout_alignBottom="@+id/suspect_avatar"
-                android:layout_toRightOf="@+id/hammer_img" />
+                android:layout_alignTop="@+id/suspect_avatar"
+                android:layout_toRightOf="@+id/hammer_img"
+                android:layout_toEndOf="@+id/hammer_img" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -165,17 +165,6 @@
                 android:layout_toStartOf="@+id/hammer_img"
                 android:visibility="gone"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:id="@+id/suspect_report_count"
-                android:textSize="20sp"
-                android:textColor="#FFF"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@+id/suspect_avatar"
-                android:layout_toEndOf="@+id/suspect_avatar"
-                android:layout_marginLeft="5dp" />
         </RelativeLayout>
 
         <!-- EXPANDED CARDVIEW -->
@@ -283,7 +272,8 @@
                     android:clickable="true"
                     android:layout_below="@+id/linearLayout"
                     android:layout_toRightOf="@+id/taken_txt"
-                    android:layout_toEndOf="@+id/taken_txt" />
+                    android:layout_toEndOf="@+id/taken_txt"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <TextView
@@ -291,13 +281,12 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="TASK IS TAKEN"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:id="@+id/taken_txt"
                 android:textColor="@android:color/white"
-                android:layout_marginRight="40dp"
                 android:layout_alignTop="@+id/karma_id"
-                android:layout_toLeftOf="@+id/karma_id"
-                android:layout_toStartOf="@+id/karma_id" />
+                android:layout_toRightOf="@+id/linearLayout"
+                android:layout_toEndOf="@+id/linearLayout" />
 
             <TextView
                 android:layout_width="wrap_content"

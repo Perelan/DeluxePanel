@@ -1,6 +1,8 @@
 package sharecrew.net.fragpanel.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -31,6 +34,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import sharecrew.net.fragpanel.extra.Utility;
 import sharecrew.net.fragpanel.login.Admin;
 import sharecrew.net.fragpanel.reports.HTTPFetchSteam;
 import sharecrew.net.fragpanel.reports.HTTPReportRequest;
@@ -69,13 +73,17 @@ public class MainActivity extends AppCompatActivity
 
         recView = (RecyclerView) findViewById(R.id.recycler_view);
         recView.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(this);
+        GridLayoutManager llm;
+        if(Utility.isTablet(this)){
+            llm = new GridLayoutManager(this, 2);
+        }else{
+            llm = new GridLayoutManager(this, 1);
+
+        }
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recView.setLayoutManager(llm);
 
         handle_list();
-
-        la.setRecylerview(recView); // Set recyclerview inside of adapter to manage scrolltolocation
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         mSwipeRefreshLayout.setOnRefreshListener(
@@ -149,7 +157,7 @@ public class MainActivity extends AppCompatActivity
 
         try{
             list = new AsyncList().execute().get();
-            la = new ListAdapter(list);
+            la = new ListAdapter(list, this);
             recView.setAdapter(la);
 
             if(list != null){

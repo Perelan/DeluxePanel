@@ -1,6 +1,9 @@
 package sharecrew.net.fragpanel.extra;
 
 
+import android.content.Context;
+import android.content.res.Configuration;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -47,5 +50,11 @@ public class Utility {
         }
 
         return "ERROR";
+    }
+
+    public static boolean isTablet(Context context) {
+        return (context.getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 }

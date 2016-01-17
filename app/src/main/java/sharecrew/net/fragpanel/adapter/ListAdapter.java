@@ -3,6 +3,7 @@ package sharecrew.net.fragpanel.adapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -55,9 +56,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     private Admin admin;
     private final String TAG = "******* List Adapter";
     private ArrayList<Report> reportToDelete;
+    private Context context;
 
-    public ListAdapter(ArrayList<Report> mDataset) {
+    public ListAdapter(ArrayList<Report> mDataset, Context context) {
         this.mDataset = mDataset;
+        this.context  = context;
     }
 
     @Override
@@ -71,7 +74,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.suspect_name.setText(mDataset.get(position).getReported_name());
-        holder.suspect_report_count.setText(mDataset.get(position).getReported_num_reports());
         holder.suspect_steamid.setText(mDataset.get(position).getReported_steam_id());
         holder.reporting_name.setText(mDataset.get(position).getReporting_name());
         holder.reporting_id.setText(mDataset.get(position).getReporting_id());
@@ -81,9 +83,16 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         holder.reason.setText(mDataset.get(position).getReason());
         Picasso.with(holder.suspected_pic.getContext()).load(mDataset.get(position).getReported_avatar()).into(holder.suspected_pic);
         Picasso.with(holder.reporting_pic.getContext()).load(mDataset.get(position).getReporting_avatar()).into(holder.reporting_pic);
-        holder.expandUp.setVisibility(View.GONE);
-        holder.expandable.setVisibility(View.GONE);
         holder.task.setVisibility(View.GONE);
+
+        if(!Utility.isTablet(context)){
+            holder.expandUp.setVisibility(View.GONE);
+            holder.expandable.setVisibility(View.GONE);
+        }else{
+            holder.expandable.setVisibility(View.VISIBLE);
+            holder.expandDown.setVisibility(View.GONE);
+            holder.expandUp.setVisibility(View.GONE);
+        }
 
         if(!mDataset.get(position).getAdmin_name().equals("null")){
             holder.admin_name.setText(mDataset.get(position).getAdmin_name());
@@ -104,12 +113,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             holder.command.setVisibility(View.VISIBLE);
         }
 
-    }
-
-    private RecyclerView recView;
-
-    public void setRecylerview(RecyclerView view){
-        recView = view;
     }
 
     @Override
@@ -164,7 +167,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
      */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         CardView cv;
-        TextView server_name, admin_name, date, suspect_name, suspect_steamid, suspect_report_count,
+        TextView server_name, admin_name, date, suspect_name, suspect_steamid,
                 reporting_id, reporting_name, reason, karma, task;
         ImageView suspected_pic, reporting_pic;
         RelativeLayout expandable;
@@ -181,7 +184,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             date                    = (TextView) v.findViewById(R.id.month_text);
             suspect_name            = (TextView) v.findViewById(R.id.suspect);
             suspect_steamid         = (TextView) v.findViewById(R.id.reported_steamid);
-            suspect_report_count    = (TextView) v.findViewById(R.id.suspect_report_count);
             reporting_name          = (TextView) v.findViewById(R.id.reporter);
             reporting_id            = (TextView) v.findViewById(R.id.reporting_id);
             reason                  = (TextView) v.findViewById(R.id.reason_text);
@@ -200,13 +202,15 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             isRepPressed            = false;
             data_to_send            = new HashMap<>();
 
-            uparrow.setOnClickListener(this);
-            downarrow.setOnClickListener(this);
             claim.setOnClickListener(this);
-
             command.setOnClickListener(this);
 
-            v.setOnClickListener(this);
+            if(!Utility.isTablet(v.getContext())){
+                v.setOnClickListener(this);
+            }
+
+            uparrow.setOnClickListener(this);
+            downarrow.setOnClickListener(this);
         }
 
         @SuppressWarnings("unchecked")
