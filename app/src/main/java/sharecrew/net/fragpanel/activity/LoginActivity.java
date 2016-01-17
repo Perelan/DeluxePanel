@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -95,6 +97,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
 
         as = new AdminSession(this);
+
+        if(as.isLoggedIn()){
+            mEmailView.setText(as.getAdminSession().getName());
+            mEmailView.setEnabled(false);
+            mEmailView.setTextColor(Color.parseColor("#CECECE"));
+            mEmailView.setTypeface(null, Typeface.BOLD);
+            mPasswordView.requestFocus();
+        }
     }
 
     /**
@@ -266,13 +276,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
             HTTPLoginRequest loginReq = new HTTPLoginRequest(username, password);
             String info = loginReq.connect();
 
@@ -296,9 +299,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 System.out.println(admin_steam_id64);
                 System.out.println(avatar);
 
-                as.setAdminSession(new Admin(admin_id, admin_name, admin_steam_id, admin_steam_id64,
-                                    admin_username, admin_password, superadmin, avatar));
-                as.setAdminLoggedIn(true);
+                if(!as.isLoggedIn()){
+                    as.setAdminSession(new Admin(admin_id, admin_name, admin_steam_id, admin_steam_id64,
+                            admin_username, admin_password, superadmin, avatar));
+                    as.setAdminLoggedIn(true);
+                }
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }

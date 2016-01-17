@@ -63,13 +63,45 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        as = new AdminSession(this);
-
         status = (TextView) findViewById(R.id.status_message);
         avatar = (ImageView) findViewById(R.id.icon);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        as = new AdminSession(this);
+    }
+
+    public void handle_list(){
+
+        try{
+            list = new AsyncList().execute().get();
+            la = new ListAdapter(list, this);
+            recView.setAdapter(la);
+
+            if(list != null){
+                status.setVisibility(View.GONE);
+            }else{
+                status.setVisibility(View.VISIBLE);
+            }
+        }catch (Exception e){
+            e.getStackTrace();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         recView = (RecyclerView) findViewById(R.id.recycler_view);
         recView.setHasFixedSize(true);
@@ -78,8 +110,8 @@ public class MainActivity extends AppCompatActivity
             llm = new GridLayoutManager(this, 2);
         }else{
             llm = new GridLayoutManager(this, 1);
-
         }
+
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recView.setLayoutManager(llm);
 
@@ -94,15 +126,6 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
         );
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
 
         Picasso.with(this).load(as.getAdminSession().getAvatar()).into(avatar);
 
@@ -151,32 +174,7 @@ public class MainActivity extends AppCompatActivity
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recView);
-    }
 
-    public void handle_list(){
-
-        try{
-            list = new AsyncList().execute().get();
-            la = new ListAdapter(list, this);
-            recView.setAdapter(la);
-
-            if(list != null){
-                status.setVisibility(View.GONE);
-            }else{
-                status.setVisibility(View.VISIBLE);
-            }
-        }catch (Exception e){
-            e.getStackTrace();
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        if(!as.isLoggedIn()){
-            startActivity(new Intent(getApplicationContext(), Splash.class).addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY));
-        }
     }
 
     @Override
