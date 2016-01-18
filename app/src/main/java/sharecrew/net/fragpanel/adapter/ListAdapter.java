@@ -2,28 +2,24 @@ package sharecrew.net.fragpanel.adapter;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -44,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import sharecrew.net.fragpanel.R;
-import sharecrew.net.fragpanel.activity.MainActivity;
 import sharecrew.net.fragpanel.extra.Utility;
 import sharecrew.net.fragpanel.login.Admin;
 import sharecrew.net.fragpanel.login.AdminSession;
@@ -268,7 +263,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 // STEAM ID - COMMAND - SERVER
 
                 LayoutInflater inflater = LayoutInflater.from(v.getContext());
-                View promptsView = inflater.inflate(R.layout.popup_display, null);
+                View promptsView = inflater.inflate(R.layout.activity_splash, null);
 
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
                 alertDialogBuilder.setView(promptsView);

@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -41,6 +42,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import sharecrew.net.fragpanel.R;
+import sharecrew.net.fragpanel.extra.Utility;
 import sharecrew.net.fragpanel.login.Admin;
 import sharecrew.net.fragpanel.login.AdminSession;
 import sharecrew.net.fragpanel.login.HTTPLoginRequest;
@@ -63,14 +65,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-
     private AdminSession as;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        // Set up the login form.
+        // Set up the login form
+
+        as = new AdminSession(this);
+
+        if(as.isLoggedIn()){
+            startActivity(new Intent(this, SplashActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY));
+            finish();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -95,16 +108,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-
-        as = new AdminSession(this);
-
-        if(as.isLoggedIn()){
-            mEmailView.setText(as.getAdminSession().getName());
-            mEmailView.setEnabled(false);
-            mEmailView.setTextColor(Color.parseColor("#CECECE"));
-            mEmailView.setTypeface(null, Typeface.BOLD);
-            mPasswordView.requestFocus();
-        }
     }
 
     /**
@@ -157,8 +160,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            //showProgress(true);
+            mAuthTask = new UserLoginTask(this, email, password);
             mAuthTask.execute((Void) null);
         }
     }
@@ -265,17 +268,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
+        private Context context;
         private final String username;
         private final String password;
 
-        UserLoginTask(String username, String password) {
+        UserLoginTask(Context context, String username, String password) {
+            this.context  = context;
             this.username = username;
             this.password = password;
         }
 
-
         @Override
         protected Boolean doInBackground(Void... params) {
+
+            if(!Utility.isNetworkAvailable(context)){
+                return false;
+            }
+
             HTTPLoginRequest loginReq = new HTTPLoginRequest(username, password);
             String info = loginReq.connect();
 
@@ -296,14 +305,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 String superadmin       = jsonObject.get("superadmin").toString();
                 String avatar           = new HTTPFetchSteam(admin_steam_id64).fetch_steam_avatar();
 
-                System.out.println(admin_steam_id64);
-                System.out.println(avatar);
-
-                if(!as.isLoggedIn()){
-                    as.setAdminSession(new Admin(admin_id, admin_name, admin_steam_id, admin_steam_id64,
-                            admin_username, admin_password, superadmin, avatar));
-                    as.setAdminLoggedIn(true);
-                }
+                as.setAdminSession(new Admin(admin_id, admin_name, admin_steam_id, admin_steam_id64,
+                        admin_username, admin_password, superadmin, avatar));
+                as.setAdminLoggedIn(true);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -315,11 +319,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-            showProgress(false);
+            //showProgress(false);
 
             if (success) {
                 finish();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                startActivity(new Intent(getApplicationContext(), SplashActivity.class));
             } else {
                 mEmailView.setError(getString(R.string.error_invalid_email));
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
@@ -330,7 +334,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-            showProgress(false);
+            //showProgress(false);
         }
     }
 }

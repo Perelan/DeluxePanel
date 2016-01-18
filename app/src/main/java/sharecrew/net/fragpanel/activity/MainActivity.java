@@ -1,5 +1,7 @@
 package sharecrew.net.fragpanel.activity;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -18,6 +20,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +37,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.zip.Inflater;
 
 import sharecrew.net.fragpanel.extra.Utility;
 import sharecrew.net.fragpanel.login.Admin;
@@ -64,6 +69,13 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        as = new AdminSession(this);
+
+        if(!as.isLoggedIn()){
+            startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY));
+            finish();
+        }
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -79,33 +91,30 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        as = new AdminSession(this);
-    }
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        recView.setVisibility(View.GONE);
+                        handle_list();
 
-    public void handle_list(){
+                    }
+                }
+        );
+        mSwipeRefreshLayout.setRefreshing(true);
 
-        try{
-            list = new AsyncList().execute().get();
-            la = new ListAdapter(list, this);
-            recView.setAdapter(la);
-
-            if(list != null){
-                status.setVisibility(View.GONE);
-            }else{
-                status.setVisibility(View.VISIBLE);
-            }
-        }catch (Exception e){
-            e.getStackTrace();
-        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
+
         recView = (RecyclerView) findViewById(R.id.recycler_view);
         recView.setHasFixedSize(true);
         GridLayoutManager llm;
+
         if(Utility.isTablet(this)){
             llm = new GridLayoutManager(this, 2);
         }else{
@@ -116,16 +125,6 @@ public class MainActivity extends AppCompatActivity
         recView.setLayoutManager(llm);
 
         handle_list();
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
-        mSwipeRefreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        handle_list();
-                    }
-                }
-        );
 
         Picasso.with(this).load(as.getAdminSession().getAvatar()).into(avatar);
 
@@ -175,6 +174,32 @@ public class MainActivity extends AppCompatActivity
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recView);
 
+    }
+
+    public void handle_list(){
+
+        if(!Utility.isNetworkAvailable(this)){
+            status.setVisibility(View.VISIBLE);
+            status.setText("Please connect to a network!");
+        }else{
+            try{
+                list = new AsyncList().execute().get();
+                la = new ListAdapter(list, this);
+                recView.setAdapter(la);
+
+                if(list != null){
+                    status.setVisibility(View.GONE);
+                }else{
+                    status.setText("No Entries!");
+                    status.setVisibility(View.VISIBLE);
+                }
+
+                recView.setVisibility(View.VISIBLE);
+
+            }catch (Exception e){
+                e.getStackTrace();
+            }
+        }
     }
 
     @Override
@@ -265,7 +290,6 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(ArrayList<Report> result) {
             super.onPostExecute(result);
-
             mSwipeRefreshLayout.setRefreshing(false);
         }
     }
