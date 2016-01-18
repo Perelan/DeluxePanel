@@ -3,9 +3,15 @@ package sharecrew.net.fragpanel.extra;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Paint;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.NumberPicker;
 
+import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,5 +71,29 @@ public class Utility {
                 = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    /**
+     * A method i took for the web to change the color of the values inside of the NumberPicker
+     */
+    public static boolean setNumberPickerTextColor(NumberPicker numberPicker, int color) {
+        final int count = numberPicker.getChildCount();
+        for (int i = 0; i < count; i++) {
+            View child = numberPicker.getChildAt(i);
+            if (child instanceof EditText) {
+                try {
+                    Field selectorWheelPaintField = numberPicker.getClass()
+                            .getDeclaredField("mSelectorWheelPaint");
+                    selectorWheelPaintField.setAccessible(true);
+                    ((Paint) selectorWheelPaintField.get(numberPicker)).setColor(color);
+                    ((EditText) child).setTextColor(color);
+                    numberPicker.invalidate();
+                    return true;
+                } catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException e) {
+                    Log.w("setNumberPickerText", e);
+                }
+            }
+        }
+        return false;
     }
 }

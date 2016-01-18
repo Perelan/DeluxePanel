@@ -104,13 +104,6 @@ public class MainActivity extends AppCompatActivity
         );
         mSwipeRefreshLayout.setRefreshing(true);
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-
         recView = (RecyclerView) findViewById(R.id.recycler_view);
         recView.setHasFixedSize(true);
         GridLayoutManager llm;
@@ -127,6 +120,12 @@ public class MainActivity extends AppCompatActivity
         handle_list();
 
         Picasso.with(this).load(as.getAdminSession().getAvatar()).into(avatar);
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
 
         admin_name      = (TextView) findViewById(R.id.admin_name);
         admin_steamid   = (TextView) findViewById(R.id.admin_steamid);
@@ -173,7 +172,6 @@ public class MainActivity extends AppCompatActivity
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recView);
-
     }
 
     public void handle_list(){

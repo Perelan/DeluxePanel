@@ -263,16 +263,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 // STEAM ID - COMMAND - SERVER
 
                 LayoutInflater inflater = LayoutInflater.from(v.getContext());
-                View promptsView = inflater.inflate(R.layout.activity_splash, null);
+                View promptsView = inflater.inflate(R.layout.popup_display, null);
 
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
                 alertDialogBuilder.setView(promptsView);
 
                 final RelativeLayout rl = (RelativeLayout) promptsView.findViewById(R.id.hidethispart);
-                rl.setVisibility(View.GONE);
-
-                final Spinner mSpinner = (Spinner) promptsView
-                        .findViewById(R.id.popspinner);
+                final Spinner mSpinner = (Spinner) promptsView.findViewById(R.id.popspinner);
 
                 List<String> list = new ArrayList<>();
                 list.add("Pick a command:");
@@ -291,7 +288,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 final NumberPicker np = (NumberPicker) promptsView.findViewById(R.id.numberPicker);
                 np.setMaxValue(3600);
                 np.setMinValue(0);
-                setNumberPickerTextColor(np, Color.WHITE);
+                Utility.setNumberPickerTextColor(np, Color.WHITE);
 
                 final EditText edit = (EditText) promptsView.findViewById(R.id.editText);
                 edit.setTextColor(Color.WHITE);
@@ -358,8 +355,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                     expandable.setAnimation(animFadeIn);
                     expandable.setVisibility(View.VISIBLE);
 
-                    //recView.scrollToPosition(this.getAdapterPosition());
-
                     isExpanded = true;
                 } else {
                     expandUp.setVisibility(View.GONE);
@@ -373,32 +368,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
                 }
             }
         }
-
-        /**
-         * A method i took for the web to change the color of the values inside of the NumberPicker
-         */
-        public boolean setNumberPickerTextColor(NumberPicker numberPicker, int color) {
-            final int count = numberPicker.getChildCount();
-            for (int i = 0; i < count; i++) {
-                View child = numberPicker.getChildAt(i);
-                if (child instanceof EditText) {
-                    try {
-                        Field selectorWheelPaintField = numberPicker.getClass()
-                                .getDeclaredField("mSelectorWheelPaint");
-                        selectorWheelPaintField.setAccessible(true);
-                        ((Paint) selectorWheelPaintField.get(numberPicker)).setColor(color);
-                        ((EditText) child).setTextColor(color);
-                        numberPicker.invalidate();
-                        return true;
-                    } catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException e) {
-                        Log.w("setNumberPickerText", e);
-                    }
-                }
-            }
-            return false;
-        }
-        ////////////////////////////////////////////////////////////////////////
-
     }
 
     /**
