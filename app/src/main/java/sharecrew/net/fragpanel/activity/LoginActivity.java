@@ -74,11 +74,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Set up the login form
 
         as = new AdminSession(this);
-
-        if(as.isLoggedIn()){
-            startActivity(new Intent(this, SplashActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY));
-            finish();
-        }
     }
 
     @Override

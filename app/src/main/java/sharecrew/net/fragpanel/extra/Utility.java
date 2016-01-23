@@ -22,7 +22,7 @@ import java.util.Locale;
 public class Utility {
 
     public static final String KEY = "fragpanel123";
-    public static final String WEBSITE = "http://sharecrew.net/deluxepanel/";
+    public static final String WEBSITE = "https://fragdeluxe.com/deluxepanel/";
 
     /**
      * This method is used to convert a input timestamp (default: current timestamp from sql), which is in

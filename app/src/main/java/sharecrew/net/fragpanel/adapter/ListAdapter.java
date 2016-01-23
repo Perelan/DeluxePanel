@@ -319,7 +319,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 
                                 if (mSpinner.getSelectedItemPosition() != 0) {
                                     data_to_send.put("reason", edit.getText().toString());
-                                    data_to_send.put("server", server_name.getText().toString().substring(1, server_name.getText().toString().length()));
+                                    data_to_send.put("server", server_name.getText().toString());
                                     data_to_send.put("steamid", suspect_steamid.getText().toString());
                                     data_to_send.put("duration", Integer.toString(np.getValue()));
                                     new UpdateDataTask("handle_command.php?").execute(data_to_send);

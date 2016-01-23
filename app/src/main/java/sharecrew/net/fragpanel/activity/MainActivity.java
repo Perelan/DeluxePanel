@@ -1,10 +1,8 @@
 package sharecrew.net.fragpanel.activity;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,14 +18,10 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -36,11 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.zip.Inflater;
-
 import sharecrew.net.fragpanel.extra.Utility;
-import sharecrew.net.fragpanel.login.Admin;
 import sharecrew.net.fragpanel.reports.HTTPFetchSteam;
 import sharecrew.net.fragpanel.reports.HTTPReportRequest;
 import sharecrew.net.fragpanel.reports.Report;
@@ -48,39 +38,29 @@ import sharecrew.net.fragpanel.R;
 import sharecrew.net.fragpanel.adapter.ListAdapter;
 import sharecrew.net.fragpanel.login.AdminSession;
 
-
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener{
+        implements NavigationView.OnNavigationItemSelectedListener, getListListener{
 
     private AdminSession as;
     private TextView admin_name;
     private TextView admin_steamid;
     private TextView admin_steamid64;
-    private ArrayList<Report> list;
+    private ArrayList<Report> mList;
     private TextView status;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView recView;
     private ListAdapter la;
     private final String TAG = "*** MAIN";
     private ImageView avatar;
+    private getListListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        as = new AdminSession(this);
-
-        if(!as.isLoggedIn()){
-            startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY));
-            finish();
-        }
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        status = (TextView) findViewById(R.id.status_message);
-        avatar = (ImageView) findViewById(R.id.icon);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -91,41 +71,13 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
-        mSwipeRefreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        recView.setVisibility(View.GONE);
-                        handle_list();
+        as = new AdminSession(this);
+        listener = this;
 
-                    }
-                }
-        );
-        mSwipeRefreshLayout.setRefreshing(true);
-
-        recView = (RecyclerView) findViewById(R.id.recycler_view);
-        recView.setHasFixedSize(true);
-        GridLayoutManager llm;
-
-        if(Utility.isTablet(this)){
-            llm = new GridLayoutManager(this, 2);
-        }else{
-            llm = new GridLayoutManager(this, 1);
+        if(!as.isLoggedIn()){
+            startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY));
+            finish();
         }
-
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        recView.setLayoutManager(llm);
-
-        handle_list();
-
-        Picasso.with(this).load(as.getAdminSession().getAvatar()).into(avatar);
-    }
-
-    @Override
-    protected void onStart() {
-
-        super.onStart();
 
         admin_name      = (TextView) findViewById(R.id.admin_name);
         admin_steamid   = (TextView) findViewById(R.id.admin_steamid);
@@ -135,6 +87,43 @@ public class MainActivity extends AppCompatActivity
         admin_steamid.setText(as.getAdminSession().getSteamid());
         admin_steamid64.setText(as.getAdminSession().getSteamid64());
 
+        status = (TextView) findViewById(R.id.status_message);
+        avatar = (ImageView) findViewById(R.id.icon);
+
+        Picasso.with(this).load(as.getAdminSession().getAvatar()).into(avatar);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        recView.setVisibility(View.GONE);
+                        new AsyncList(listener).execute();
+                    }
+                }
+        );
+        mSwipeRefreshLayout.setRefreshing(true);
+
+        recView = (RecyclerView) findViewById(R.id.recycler_view);
+        recView.setHasFixedSize(true);
+        GridLayoutManager glm;
+
+        if(Utility.isTablet(this)){
+            glm = new GridLayoutManager(this, 2);
+        }else{
+            glm = new GridLayoutManager(this, 1);
+        }
+        glm.setOrientation(LinearLayoutManager.VERTICAL);
+        recView.setLayoutManager(glm);
+
+        new AsyncList(this).execute();
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -143,7 +132,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-                String admin_name = list.get(viewHolder.getAdapterPosition()).getAdmin_name();
+                String admin_name = mList.get(viewHolder.getAdapterPosition()).getAdmin_name();
                 final int swipeFlags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
                 return !admin_name.equals(as.getAdminSession().getName()) ? 0 : makeMovementFlags(0, swipeFlags);
             }
@@ -174,15 +163,16 @@ public class MainActivity extends AppCompatActivity
         itemTouchHelper.attachToRecyclerView(recView);
     }
 
-    public void handle_list(){
+    @Override
+    public void onDataFetch(ArrayList<Report> list) {
 
         if(!Utility.isNetworkAvailable(this)){
             status.setVisibility(View.VISIBLE);
             status.setText("Please connect to a network!");
         }else{
             try{
-                list = new AsyncList().execute().get();
-                la = new ListAdapter(list, this);
+                mList = list;
+                la = new ListAdapter(mList, this);
                 recView.setAdapter(la);
 
                 if(list != null){
@@ -233,9 +223,27 @@ public class MainActivity extends AppCompatActivity
 
     public class AsyncList extends AsyncTask<Void, Void, ArrayList<Report>> {
 
+        private getListListener listener;
+        private ProgressDialog dialog;
+
+        public AsyncList(getListListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(MainActivity.this);
+            this.dialog.setTitle("Please wait");
+            this.dialog.setMessage("Loading all reports. This might take some time.");
+            this.dialog.setCancelable(false);
+            this.dialog.show();
+        }
+
         @Override
         protected ArrayList<Report> doInBackground(Void... params) {
             ArrayList<Report> list = new ArrayList<>();
+
 
             HTTPReportRequest rr = new HTTPReportRequest();
             String s = rr.connect();
@@ -288,7 +296,9 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(ArrayList<Report> result) {
             super.onPostExecute(result);
+            listener.onDataFetch(result);
             mSwipeRefreshLayout.setRefreshing(false);
+            dialog.dismiss();
         }
     }
 }
