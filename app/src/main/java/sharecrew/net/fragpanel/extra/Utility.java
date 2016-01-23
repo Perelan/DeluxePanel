@@ -1,6 +1,5 @@
 package sharecrew.net.fragpanel.extra;
 
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Paint;
@@ -60,12 +59,22 @@ public class Utility {
         return "ERROR";
     }
 
+    /**
+     * Checks if the device is a table or not
+     * @param context current context
+     * @return is tablet or not
+     */
     public static boolean isTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK)
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
+    /**
+     * Check if user has network available.
+     * @param context current context
+     * @return internet or not
+     */
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

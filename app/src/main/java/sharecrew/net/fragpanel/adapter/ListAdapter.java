@@ -211,161 +211,174 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         @SuppressWarnings("unchecked")
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         @Override
-        public void onClick(final View v) {
-
+        public void onClick(View v) {
             // Handle the claim button
             if(v.getId() == R.id.claim_btn) {
-                admin_name.setText(admin.getName());
-                admin_name.setTypeface(null, Typeface.NORMAL);
-
-                claim.setVisibility(View.GONE);
-                command.setVisibility(View.VISIBLE);
-
-                data_to_send.put("id", mDataset.get(this.getAdapterPosition()).getReport_id());
-                data_to_send.put("admin_id", admin.getId());
-
-                new UpdateDataTask("update_report_admin.php?").execute(data_to_send);
+                handle_claim_action();
             // Handle karma upvote and downvote
             }else if (v.getId() == R.id.uparrow || v.getId() == R.id.downarrow) {
-                if (!admin_name.getText().equals(admin.getName())) {
-                    Toast.makeText(v.getContext(), "You've to be the claiming admin to do that!",
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    int karma_count = Integer.parseInt(karma.getText().toString());
-
-                    if (v.getId() == R.id.uparrow) {
-                        if (isRepPressed) {
-                            karma_count += 2;
-                        } else {
-                            karma_count++;
-                        }
-                        uparrow.setEnabled(false);
-                        downarrow.setEnabled(true);
-                    } else {
-                        if (isRepPressed) {
-                            karma_count -= 2;
-                        } else {
-                            karma_count--;
-                        }
-                        uparrow.setEnabled(true);
-                        downarrow.setEnabled(false);
-                    }
-
-                    karma.setText(String.format("%s", karma_count));
-                    isRepPressed = true;
-
-                    data_to_send.put("user", reporting_id.getText().toString());
-                    data_to_send.put("karma", karma.getText().toString());
-                    new UpdateDataTask("update_karma.php?").execute(data_to_send);
-                }
-            // Handle the expand view (able to press the whole card to expand).
+                handle_karma_action(v);
+            // Handle a command pressed
             }else if(v.getId() == R.id.command_btn){
-                // STEAM ID - COMMAND - SERVER
-
-                LayoutInflater inflater = LayoutInflater.from(v.getContext());
-                View promptsView = inflater.inflate(R.layout.popup_display, null);
-
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
-                alertDialogBuilder.setView(promptsView);
-
-                final RelativeLayout rl = (RelativeLayout) promptsView.findViewById(R.id.hidethispart);
-                final Spinner mSpinner = (Spinner) promptsView.findViewById(R.id.popspinner);
-
-                List<String> list = new ArrayList<>();
-                list.add("Pick a command:");
-                list.add("Mute");
-                list.add("Silence");
-                list.add("Gag");
-                list.add("Kick");
-                list.add("Ban");
-
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<>
-                        (v.getContext(), R.layout.spinner_item,list);
-                dataAdapter.setDropDownViewResource
-                        (android.R.layout.simple_spinner_dropdown_item);
-                mSpinner.setAdapter(dataAdapter);
-
-                final NumberPicker np = (NumberPicker) promptsView.findViewById(R.id.numberPicker);
-                np.setMaxValue(3600);
-                np.setMinValue(0);
-                Utility.setNumberPickerTextColor(np, Color.WHITE);
-
-                final EditText edit = (EditText) promptsView.findViewById(R.id.editText);
-                edit.setTextColor(Color.WHITE);
-                edit.getBackground().setColorFilter(Color.LTGRAY, PorterDuff.Mode.SRC_ATOP);
-
-                mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if (parent.getSelectedItemPosition() > 0) {
-                            rl.setVisibility(View.VISIBLE);
-                            data_to_send.put("command", parent.getSelectedItem().toString());
-                        } else {
-                            rl.setVisibility(View.GONE);
-                        }
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                    }
-                });
-
-                alertDialogBuilder
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User clicked OK, so save the mSelectedItems results somewhere
-                                // or return them to the component that opened the dialog
-
-                                if (mSpinner.getSelectedItemPosition() != 0) {
-                                    data_to_send.put("reason", edit.getText().toString());
-                                    data_to_send.put("server", server_name.getText().toString());
-                                    data_to_send.put("steamid", suspect_steamid.getText().toString());
-                                    data_to_send.put("duration", Integer.toString(np.getValue()));
-                                    new UpdateDataTask("handle_command.php?").execute(data_to_send);
-                                    Toast.makeText(v.getContext(), "Command executed! (Hopefully)", Toast.LENGTH_LONG).show();
-                                } else {
-                                    Toast.makeText(v.getContext(), "Please pick a command!", Toast.LENGTH_LONG).show();
-                                }
-
-                                dialog.dismiss();
-                            }
-                        })
-                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.dismiss();
-                            }
-                        });
-
-                // create alert dialog
-                final AlertDialog alertDialog = alertDialogBuilder.create();
-
-                // show it
-                alertDialog.show();
-                alertDialog.setCanceledOnTouchOutside(true);
-
+                handle_command_action(v);
+            // Handle the expand view (able to press the whole card to expand).
             } else {
+                handle_card_expand(v);
+            }
+        }
 
-                if (!isExpanded) {
-                    expandUp.setVisibility(View.VISIBLE);
-                    expandDown.setVisibility(View.GONE);
+        private void handle_claim_action(){
+            admin_name.setText(admin.getName());
+            admin_name.setTypeface(null, Typeface.NORMAL);
 
-                    Animation animFadeIn = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_in);
-                    expandable.setAnimation(animFadeIn);
-                    expandable.setVisibility(View.VISIBLE);
+            claim.setVisibility(View.GONE);
+            command.setVisibility(View.VISIBLE);
 
-                    isExpanded = true;
+            data_to_send.put("id", mDataset.get(this.getAdapterPosition()).getReport_id());
+            data_to_send.put("admin_id", admin.getId());
+
+            new UpdateDataTask("update_report_admin.php?").execute(data_to_send);
+        }
+
+        private void handle_karma_action(View v){
+            if (!admin_name.getText().equals(admin.getName())) {
+                Toast.makeText(v.getContext(), "You've to be the claiming admin to do that!",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                int karma_count = Integer.parseInt(karma.getText().toString());
+
+                if (v.getId() == R.id.uparrow) {
+                    if (isRepPressed) {
+                        karma_count += 2;
+                    } else {
+                        karma_count++;
+                    }
+                    uparrow.setEnabled(false);
+                    downarrow.setEnabled(true);
                 } else {
-                    expandUp.setVisibility(View.GONE);
-                    expandDown.setVisibility(View.VISIBLE);
-
-                    Animation animFadeOut = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_out);
-                    expandable.setAnimation(animFadeOut);
-                    expandable.setVisibility(View.GONE);
-
-                    isExpanded = false;
+                    if (isRepPressed) {
+                        karma_count -= 2;
+                    } else {
+                        karma_count--;
+                    }
+                    uparrow.setEnabled(true);
+                    downarrow.setEnabled(false);
                 }
+
+                karma.setText(String.format("%s", karma_count));
+                isRepPressed = true;
+
+                data_to_send.put("user", reporting_id.getText().toString());
+                data_to_send.put("karma", karma.getText().toString());
+                new UpdateDataTask("update_karma.php?").execute(data_to_send);
+            }
+        }
+
+        public void handle_command_action(final View v){
+            LayoutInflater inflater = LayoutInflater.from(v.getContext());
+            View promptsView = inflater.inflate(R.layout.popup_display, null);
+
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
+            alertDialogBuilder.setView(promptsView);
+
+            final RelativeLayout rl = (RelativeLayout) promptsView.findViewById(R.id.hidethispart);
+            final Spinner mSpinner = (Spinner) promptsView.findViewById(R.id.popspinner);
+
+            List<String> list = new ArrayList<>();
+            list.add("Pick a command:");
+            list.add("Mute");
+            list.add("Silence");
+            list.add("Gag");
+            list.add("Kick");
+            list.add("Ban");
+
+            ArrayAdapter<String> dataAdapter = new ArrayAdapter<>
+                    (v.getContext(), R.layout.spinner_item,list);
+            dataAdapter.setDropDownViewResource
+                    (android.R.layout.simple_spinner_dropdown_item);
+            mSpinner.setAdapter(dataAdapter);
+
+            final NumberPicker np = (NumberPicker) promptsView.findViewById(R.id.numberPicker);
+            np.setMaxValue(3600);
+            np.setMinValue(0);
+            Utility.setNumberPickerTextColor(np, Color.WHITE);
+
+            final EditText edit = (EditText) promptsView.findViewById(R.id.editText);
+            edit.setTextColor(Color.WHITE);
+            edit.getBackground().setColorFilter(Color.LTGRAY, PorterDuff.Mode.SRC_ATOP);
+
+            mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (parent.getSelectedItemPosition() > 0) {
+                        rl.setVisibility(View.VISIBLE);
+                        data_to_send.put("command", parent.getSelectedItem().toString());
+                    } else {
+                        rl.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+
+            alertDialogBuilder
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User clicked OK, so save the mSelectedItems results somewhere
+                            // or return them to the component that opened the dialog
+
+                            if (mSpinner.getSelectedItemPosition() != 0) {
+                                data_to_send.put("reason", edit.getText().toString());
+                                data_to_send.put("server", server_name.getText().toString());
+                                data_to_send.put("steamid", suspect_steamid.getText().toString());
+                                data_to_send.put("duration", Integer.toString(np.getValue()));
+                                new UpdateDataTask("handle_command.php?").execute(data_to_send);
+                                Toast.makeText(v.getContext(), "Command executed! (Hopefully)", Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(v.getContext(), "Please pick a command!", Toast.LENGTH_LONG).show();
+                            }
+
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+
+            // create alert dialog
+            final AlertDialog alertDialog = alertDialogBuilder.create();
+
+            // show it
+            alertDialog.show();
+            alertDialog.setCanceledOnTouchOutside(true);
+        }
+
+
+        public void handle_card_expand(View v){
+            if (!isExpanded) {
+                expandUp.setVisibility(View.VISIBLE);
+                expandDown.setVisibility(View.GONE);
+
+                Animation animFadeIn = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_in);
+                expandable.setAnimation(animFadeIn);
+                expandable.setVisibility(View.VISIBLE);
+
+                isExpanded = true;
+            } else {
+                expandUp.setVisibility(View.GONE);
+                expandDown.setVisibility(View.VISIBLE);
+
+                Animation animFadeOut = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_out);
+                expandable.setAnimation(animFadeOut);
+                expandable.setVisibility(View.GONE);
+
+                isExpanded = false;
             }
         }
     }

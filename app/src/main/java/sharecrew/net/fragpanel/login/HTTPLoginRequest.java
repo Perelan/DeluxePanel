@@ -18,8 +18,6 @@ public class HTTPLoginRequest {
 
    private String username, password;
 
-    // 10.0.3.2 <-- GenyMotion
-
     private final String LINK = "fetch_admin.php";
 
     public HTTPLoginRequest(String username, String password){
