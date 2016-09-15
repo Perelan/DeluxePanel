@@ -3,3 +3,7 @@ The purpose of this application is to help administrators on the community serve
 
 The soul purpose of the application is to display and manage reported players. This is done by querying the database for new entries (with PHP, and print the output in a json format, so the application can parse the information), and display a "report-card" (see below). An administrator then have the option to claim the report and either go onto the server and handle the report for there or execute a command with the application.
 
+<br>
+
+&nbsp; &nbsp; &nbsp; &nbsp;![alt tag](https://riat.io/img/portfolio/dp-landing.png) &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
+![alt tag](https://riat.io/img/portfolio/dp-claim.png)
